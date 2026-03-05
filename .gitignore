@@ -1,0 +1,27 @@
+# Secret keys
+.env
+.env.local
+.env.production
+
+# Google auth files
+service-account.json
+credentials.json
+*.pem
+*.key
+
+# System
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Claude Code workspace
+.claude/
+
+# Temp/duplicate folders
+files/
+files 2/
+files.zip

@@ -1,0 +1,112 @@
+/**
+ * ParkLog — VaultEntry Specific Styles
+ * Mobile-first form layout.
+ */
+
+/* ── Layout ── */
+.ve-container {
+  max-width: 480px;
+  margin-inline: auto;
+}
+
+/* ── Form Card ── */
+.ve-form-card {
+  padding: var(--space-xl);
+}
+
+/* ── Placa Input ── */
+.placa-input-wrapper {
+  position: relative;
+}
+
+.placa-input {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding-inline-end: 3rem;
+}
+
+.placa-spinner {
+  position: absolute;
+  inset-inline-end: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-primary);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Submit Button ── */
+.ve-submit {
+  margin-block-start: var(--space-md);
+  font-size: 1rem;
+  padding: var(--space-md) var(--space-lg);
+  min-height: 52px;
+}
+
+.ve-submit.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ── Confirmation Banner ── */
+.ve-confirmation {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  animation: fadeInScale 200ms ease-out;
+  margin-block-start: var(--space-md);
+}
+
+.ve-confirmation.success-new {
+  background: var(--color-success-light);
+  color: #065F46;
+  border: 2px solid var(--color-success);
+}
+
+.ve-confirmation.success-known {
+  background: var(--color-info-light);
+  color: #1E40AF;
+  border: 2px solid var(--color-info);
+}
+
+/* ── Header layout ── */
+.header-back {
+  display: flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.header-center {
+  flex: 1;
+  text-align: center;
+}
+
+/* ── Responsive ── */
+@media (min-width: 768px) {
+  .ve-container {
+    max-width: 520px;
+  }
+
+  .ve-form-card {
+    padding: var(--space-2xl);
+  }
+
+  .placa-input {
+    font-size: 1.5rem;
+  }
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultEntry — ParkLog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="vault-entry.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Offline indicator -->
+  <div id="offline-bar" class="offline-bar" role="alert" aria-live="polite">
+    <span>⚠️ </span><span data-i18n="msg.offline">Sin conexión</span>
+  </div>
+
+  <!-- Header -->
+  <header class="page-header">
+    <div>
+      <a href="index.html" class="header-back" aria-label="Back">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;color:#fff"></i>
+      </a>
+    </div>
+    <div class="header-center">
+      <h1 data-i18n="entry.title">Registro de Entrada</h1>
+      <span class="subtitle" data-i18n="entry.subtitle">רישום כניסה</span>
+    </div>
+    <div class="lang-toggle" id="lang-toggle">
+      <button class="lang-option" data-lang="es">ES 🇪🇸</button>
+      <button class="lang-option" data-lang="he">HE 🇮🇱</button>
+    </div>
+  </header>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Main content -->
+  <main class="page-content">
+    <div class="ve-container">
+
+      <!-- Entry Form Card -->
+      <div class="card ve-form-card">
+
+        <!-- Placa Field -->
+        <div class="form-group">
+          <label class="form-label" for="placa-input" data-i18n="entry.placa.label">Número de Placa</label>
+          <div class="placa-input-wrapper">
+            <input
+              type="text"
+              id="placa-input"
+              class="form-input placa-input"
+              maxlength="10"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              data-i18n="entry.placa.placeholder"
+              data-i18n-attr="placeholder"
+            >
+            <div id="placa-spinner" class="placa-spinner hidden">
+              <i data-lucide="loader-2" class="spin"></i>
+            </div>
+          </div>
+          <div id="placa-error" class="form-error hidden" role="alert"></div>
+        </div>
+
+        <!-- Vehicle Status Badge -->
+        <div id="vehicle-status" class="hidden" role="status" aria-live="polite"></div>
+
+        <!-- Tipo Field -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="entry.tipo.label">Tipo de Vehículo</label>
+          <div class="toggle-group" role="radiogroup" aria-label="Vehicle type">
+            <button type="button" class="toggle-option active" data-tipo="auto" role="radio" aria-checked="true">
+              🚗 <span data-i18n="entry.tipo.auto">Automóvil</span>
+            </button>
+            <button type="button" class="toggle-option" data-tipo="moto" role="radio" aria-checked="false">
+              🛵 <span data-i18n="entry.tipo.moto">Motocicleta</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Notes Field -->
+        <div class="form-group">
+          <label class="form-label" for="notes-input" data-i18n="entry.notes.label">Observaciones</label>
+          <textarea
+            id="notes-input"
+            class="form-textarea"
+            rows="2"
+            maxlength="300"
+            data-i18n="entry.notes.placeholder"
+            data-i18n-attr="placeholder"
+          ></textarea>
+          <div class="form-hint">
+            <span id="char-count">0</span>/300 <span data-i18n="notes.charCount">caracteres</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submit-btn" class="btn btn-primary btn-block ve-submit" disabled>
+          <i data-lucide="save" style="width:20px;height:20px"></i>
+          <span data-i18n="entry.submit">Guardar Entrada</span>
+        </button>
+
+      </div>
+
+      <!-- Confirmation Banner (hidden by default) -->
+      <div id="confirmation" class="ve-confirmation hidden" role="status" aria-live="polite"></div>
+
+      <!-- Session New Vehicles List -->
+      <div id="session-list" class="card session-list">
+        <div class="session-list-header">
+          <h3>
+            <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--color-success)"></i>
+            <span data-i18n="session.title">Vehículos nuevos esta sesión</span>
+            <span id="session-count" class="session-count hidden">0</span>
+          </h3>
+          <button id="copy-session-btn" class="btn btn-sm btn-secondary hidden">
+            <i data-lucide="copy" style="width:16px;height:16px"></i>
+            <span data-i18n="session.copy">Copiar todas las placas</span>
+          </button>
+        </div>
+        <div id="session-items" class="session-items">
+          <div class="empty-state" style="padding:var(--space-lg)">
+            <p class="text-sm text-muted" data-i18n="session.empty">Aún no hay vehículos nuevos en esta sesión</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="sheets.js"></script>
+  <script src="vault-entry.js"></script>
+</body>
+</html>

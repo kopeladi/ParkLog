@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CommandCenter — ParkLog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="commandcenter.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+
+  <!-- Offline indicator -->
+  <div id="offline-bar" class="offline-bar" role="alert" aria-live="polite">
+    <span>⚠️ </span><span data-i18n="msg.offline">Sin conexión</span>
+  </div>
+
+  <!-- Header -->
+  <header class="page-header">
+    <div>
+      <a href="index.html" class="header-back" aria-label="Back">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;color:#fff"></i>
+      </a>
+    </div>
+    <div class="header-center">
+      <h1 data-i18n="cc.title">CommandCenter</h1>
+      <span class="subtitle" data-i18n="cc.subtitle">קומנדסנטר</span>
+    </div>
+    <div class="lang-toggle" id="lang-toggle">
+      <button class="lang-option" data-lang="es">ES 🇪🇸</button>
+      <button class="lang-option" data-lang="he">HE 🇮🇱</button>
+    </div>
+  </header>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Main content -->
+  <main class="page-content">
+    <div class="container cc-container">
+
+      <!-- Top bar: last updated + refresh -->
+      <div class="cc-topbar">
+        <span class="text-sm text-muted">
+          <span data-i18n="lastUpdated">Última actualización</span>:
+          <span id="last-updated">--:--</span>
+        </span>
+        <button id="refresh-btn" class="btn btn-ghost btn-sm" aria-label="Refresh">
+          <i data-lucide="refresh-cw" style="width:18px;height:18px"></i>
+        </button>
+      </div>
+
+      <!-- KPI Grid -->
+      <section class="kpi-grid" id="kpi-grid" aria-label="Key metrics">
+        <button class="kpi-card kpi-card-clickable" id="kpi-card-entries" aria-label="Show today's entries list">
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-value" id="kpi-entries-today">
+            <div class="skeleton skeleton-text" style="width:60%;margin:auto"></div>
+          </div>
+          <div class="kpi-label" data-i18n="kpi.entriesToday">Entradas hoy</div>
+        </button>
+        <button class="kpi-card kpi-card-clickable" id="kpi-card-new" aria-label="Show new vehicles today list">
+          <div class="kpi-icon">🟢</div>
+          <div class="kpi-value" id="kpi-new-today">
+            <div class="skeleton skeleton-text" style="width:60%;margin:auto"></div>
+          </div>
+          <div class="kpi-label" data-i18n="kpi.newToday">Nuevos hoy</div>
+        </button>
+        <div class="kpi-card">
+          <div class="kpi-icon">🚗</div>
+          <div class="kpi-value" id="kpi-total-vehicles">
+            <div class="skeleton skeleton-text" style="width:60%;margin:auto"></div>
+          </div>
+          <div class="kpi-label" data-i18n="kpi.totalVehicles">Total vehículos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📅</div>
+          <div class="kpi-value" id="kpi-weekly-entries">
+            <div class="skeleton skeleton-text" style="width:60%;margin:auto"></div>
+          </div>
+          <div class="kpi-label" data-i18n="kpi.weeklyEntries">Entradas semana</div>
+        </div>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="cc-charts" aria-label="Charts">
+        <div class="card cc-chart-card">
+          <div class="card-header">
+            <h3 class="card-title" data-i18n="chart.weeklyLoad">Entradas por semana</h3>
+          </div>
+          <div class="cc-chart-wrap">
+            <canvas id="chart-weekly" role="img" aria-label="Weekly entries bar chart"></canvas>
+          </div>
+        </div>
+        <div class="card cc-chart-card">
+          <div class="card-header">
+            <h3 class="card-title" data-i18n="chart.newVsKnown">Nuevos vs Conocidos</h3>
+          </div>
+          <div class="cc-chart-wrap cc-chart-doughnut">
+            <canvas id="chart-ratio" role="img" aria-label="New vs known vehicles doughnut chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters Bar -->
+      <section class="cc-filters card" aria-label="Filters">
+        <div class="cc-filters-row">
+          <!-- Search -->
+          <div class="cc-filter-item cc-filter-search">
+            <div class="cc-search-wrap">
+              <i data-lucide="search" style="width:18px;height:18px" class="cc-search-icon"></i>
+              <input type="text" id="filter-search" class="form-input cc-search-input"
+                     data-i18n="filter.search" data-i18n-attr="placeholder">
+            </div>
+          </div>
+          <!-- Tipo -->
+          <div class="cc-filter-item">
+            <label class="form-label text-xs" data-i18n="filter.type">Tipo</label>
+            <select id="filter-tipo" class="form-select cc-filter-select">
+              <option value="" data-i18n="filter.type.all">Todos</option>
+              <option value="auto" data-i18n="filter.type.auto">Automóvil</option>
+              <option value="moto" data-i18n="filter.type.moto">Motocicleta</option>
+            </select>
+          </div>
+          <!-- Status -->
+          <div class="cc-filter-item">
+            <label class="form-label text-xs" data-i18n="filter.status">Estado</label>
+            <select id="filter-status" class="form-select cc-filter-select">
+              <option value="" data-i18n="filter.status.all">Todos</option>
+              <option value="new" data-i18n="filter.status.new">Nuevos</option>
+              <option value="known" data-i18n="filter.status.known">Conocidos</option>
+            </select>
+          </div>
+          <!-- Date From -->
+          <div class="cc-filter-item">
+            <label class="form-label text-xs" data-i18n="filter.dateFrom">Desde</label>
+            <input type="date" id="filter-date-from" class="form-input cc-filter-date">
+          </div>
+          <!-- Date To -->
+          <div class="cc-filter-item">
+            <label class="form-label text-xs" data-i18n="filter.dateTo">Hasta</label>
+            <input type="date" id="filter-date-to" class="form-input cc-filter-date">
+          </div>
+          <!-- Column Toggle -->
+          <div class="cc-filter-item cc-filter-columns">
+            <button id="columns-toggle-btn" class="btn btn-sm btn-secondary">
+              <i data-lucide="columns-3" style="width:16px;height:16px"></i>
+              <span data-i18n="filter.columns">Columnas</span>
+            </button>
+            <div id="columns-dropdown" class="cc-columns-dropdown hidden"></div>
+          </div>
+          <!-- Clear Filters -->
+          <div class="cc-filter-item">
+            <button id="clear-filters-btn" class="btn btn-sm btn-ghost">
+              <i data-lucide="x" style="width:16px;height:16px"></i>
+              <span data-i18n="filter.clear">Limpiar filtros</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Export Buttons -->
+      <section class="cc-exports" aria-label="Export options">
+        <div class="cc-exports-row">
+          <button class="btn btn-sm btn-secondary cc-export-btn" data-export="newToday">
+            ⭐ <span data-i18n="export.newToday">Nuevos hoy</span>
+          </button>
+          <button class="btn btn-sm btn-secondary cc-export-btn" data-export="byDate">
+            📅 <span data-i18n="export.byDate">Por fecha</span>
+          </button>
+          <button class="btn btn-sm btn-secondary cc-export-btn" data-export="byLastSeen">
+            🔄 <span data-i18n="export.byLastSeen">Por última visita</span>
+          </button>
+          <button class="btn btn-sm btn-secondary cc-export-btn" data-export="all">
+            📋 <span data-i18n="export.all">Exportar todo</span>
+          </button>
+        </div>
+        <div id="export-submenu" class="cc-export-submenu hidden">
+          <button id="export-csv" class="btn btn-sm btn-primary">
+            <i data-lucide="download" style="width:16px;height:16px"></i>
+            <span data-i18n="export.csv">Descargar CSV</span>
+          </button>
+          <button id="export-clipboard" class="btn btn-sm btn-secondary">
+            <i data-lucide="clipboard" style="width:16px;height:16px"></i>
+            <span data-i18n="export.copy">Copiar al portapapeles</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Data Table -->
+      <section class="cc-table-section" aria-label="Vehicle data">
+        <div class="table-wrapper" id="table-wrapper">
+          <table class="data-table" id="vehicles-table">
+            <thead>
+              <tr id="table-header"></tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div id="table-empty" class="empty-state hidden">
+          <div class="empty-icon">🚗</div>
+          <p class="empty-title" data-i18n="table.empty">No hay datos para mostrar</p>
+        </div>
+        <div id="table-no-results" class="empty-state hidden">
+          <div class="empty-icon">🔍</div>
+          <p class="empty-title" data-i18n="table.noResults">No se encontraron resultados</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Notes Edit Modal -->
+  <div id="notes-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="notes-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="notes-modal-title" data-i18n="notes.edit">Editar notas</h3>
+        <button id="notes-modal-close" class="btn btn-ghost" aria-label="Close">
+          <i data-lucide="x" style="width:20px;height:20px"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="notes-modal-placa" class="cc-modal-placa"></div>
+        <div id="notes-modal-date" class="notes-modal-date hidden"></div>
+        <textarea id="notes-modal-input" class="form-textarea" rows="4" maxlength="300"></textarea>
+        <div class="form-hint">
+          <span id="notes-modal-count">0</span>/300 <span data-i18n="notes.charCount">caracteres</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="notes-modal-delete" class="btn btn-sm btn-danger hidden" data-i18n="notes.delete">Eliminar</button>
+        <div class="modal-footer-right">
+          <button id="notes-modal-cancel" class="btn btn-sm btn-secondary" data-i18n="notes.cancel">Cancelar</button>
+          <button id="notes-modal-save" class="btn btn-sm btn-primary" data-i18n="notes.save">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle History Modal -->
+  <div id="history-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="history-modal-title" data-i18n="history.title">Historial de visitas</h3>
+        <button id="history-modal-close" class="btn btn-ghost" aria-label="Close">
+          <i data-lucide="x" style="width:20px;height:20px"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="history-plate" class="cc-history-plate"></div>
+        <div id="history-list" class="cc-history-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="history-modal-done" class="btn btn-sm btn-primary" data-i18n="history.close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI List Modal -->
+  <div id="kpi-list-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="kpi-list-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="kpi-list-modal-title"></h3>
+        <button id="kpi-list-modal-close" class="btn btn-ghost" aria-label="Close">
+          <i data-lucide="x" style="width:20px;height:20px"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="kpi-list-content" class="kpi-list-content"></div>
+        <div id="kpi-list-empty" class="kpi-list-empty hidden">
+          <span>—</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="kpi-list-copy" class="btn btn-sm btn-primary">
+          <i data-lucide="clipboard" style="width:16px;height:16px"></i>
+          <span data-i18n="kpi.copyPlates">Copiar placas</span>
+        </button>
+        <button id="kpi-list-done" class="btn btn-sm btn-secondary" data-i18n="history.close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="sheets.js"></script>
+  <script src="commandcenter.js"></script>
+</body>
+</html>

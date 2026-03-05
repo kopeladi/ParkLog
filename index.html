@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParkLog — דרכלוג</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Landing Page -->
+  <main class="landing-main">
+    <div class="landing-header">
+      <h1 data-i18n="app.title">ParkLog</h1>
+      <p data-i18n="app.tagline">Sistema de gestión de estacionamiento</p>
+      <div class="lang-toggle" id="lang-toggle" style="margin-block-start: var(--space-md)">
+        <button class="lang-option" data-lang="es">ES 🇪🇸</button>
+        <button class="lang-option" data-lang="he">HE 🇮🇱</button>
+      </div>
+    </div>
+
+    <div class="landing-cards">
+      <a href="vault-entry.html" class="card landing-card">
+        <i data-lucide="log-in"></i>
+        <h2 data-i18n="landing.vaultentry.title">VaultEntry</h2>
+        <p data-i18n="landing.vaultentry.desc">Registro rápido de entrada de vehículos</p>
+      </a>
+      <a href="commandcenter.html" class="card landing-card">
+        <i data-lucide="layout-dashboard"></i>
+        <h2 data-i18n="landing.commandcenter.title">CommandCenter</h2>
+        <p data-i18n="landing.commandcenter.desc">Dashboard administrativo con datos y reportes</p>
+      </a>
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="i18n.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      updateLangToggle();
+      lucide.createIcons();
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.lang !== getCurrentLang()) {
+            toggleLang();
+            updateLangToggle();
+            lucide.createIcons();
+          }
+        });
+      });
+    });
+    function updateLangToggle() {
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === getCurrentLang());
+      });
+    }
+  </script>
+</body>
+</html>

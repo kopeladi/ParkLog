@@ -1,0 +1,536 @@
+/**
+ * ParkLog — CommandCenter Styles
+ * Dashboard-specific: charts, filters, exports, mobile card layout.
+ */
+
+/* ── Container ── */
+.cc-container {
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Top Bar ── */
+.cc-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#refresh-btn.spinning i {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── KPI Enhancements ── */
+.kpi-icon {
+  font-size: 1.5rem;
+  margin-block-end: var(--space-sm);
+}
+
+/* Clickable KPI cards */
+.kpi-card-clickable {
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  font-family: inherit;
+}
+
+.kpi-card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.kpi-card-clickable:active {
+  transform: translateY(0);
+}
+
+.kpi-card-clickable::after {
+  content: '↗';
+  position: absolute;
+  top: var(--space-sm);
+  inset-inline-end: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.kpi-card-clickable:hover::after {
+  opacity: 1;
+}
+
+/* ── KPI List Modal ── */
+.kpi-list-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.kpi-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+}
+
+.kpi-list-item .kpi-list-placa {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-family: var(--font-mono);
+}
+
+.kpi-list-item .kpi-list-tipo {
+  font-size: 1.125rem;
+}
+
+.kpi-list-empty {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ── Charts Section ── */
+.cc-charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+.cc-chart-card {
+  overflow: hidden;
+}
+
+.cc-chart-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+}
+
+.cc-chart-doughnut {
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ── Filters Bar ── */
+.cc-filters {
+  padding: var(--space-md);
+}
+
+.cc-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: flex-end;
+}
+
+.cc-filter-item {
+  flex-shrink: 0;
+}
+
+.cc-filter-search {
+  flex: 1;
+  min-width: 180px;
+}
+
+.cc-search-wrap {
+  position: relative;
+}
+
+.cc-search-icon {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: var(--space-sm);
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.cc-search-input {
+  padding-inline-start: 2.5rem;
+  min-height: 40px;
+}
+
+.cc-filter-select {
+  min-height: 40px;
+  min-width: 120px;
+  font-size: 0.875rem;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.cc-filter-date {
+  min-height: 40px;
+  min-width: 140px;
+  font-size: 0.875rem;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+/* ── Column Toggle Dropdown ── */
+.cc-filter-columns {
+  position: relative;
+}
+
+.cc-columns-dropdown {
+  position: absolute;
+  top: 100%;
+  inset-inline-end: 0;
+  z-index: 50;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-sm);
+  min-width: 200px;
+  margin-block-start: var(--space-xs);
+}
+
+.cc-columns-dropdown label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.875rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.cc-columns-dropdown label:hover {
+  background: var(--color-bg);
+}
+
+.cc-columns-dropdown input[type="checkbox"] {
+  accent-color: var(--color-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* ── Export Section ── */
+.cc-exports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.cc-exports-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.cc-export-btn.active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
+.cc-export-submenu {
+  display: flex;
+  gap: var(--space-sm);
+  animation: fadeInScale 150ms ease-out;
+}
+
+/* ── Table Cell Helpers ── */
+.data-table .cell-tipo {
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.data-table .cell-placa {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.data-table .cell-notes {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table .cell-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.data-table .cell-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-table .cell-actions button:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* ── Sort Indicator ── */
+.th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.th-sortable:hover {
+  background: var(--color-border);
+}
+
+.sort-arrow {
+  display: inline-block;
+  margin-inline-start: var(--space-xs);
+  opacity: 0.3;
+  font-size: 0.75rem;
+}
+
+.th-sortable.sorted-asc .sort-arrow,
+.th-sortable.sorted-desc .sort-arrow {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+/* ── Modal Plate Display ── */
+.cc-modal-placa {
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-align: center;
+  padding: var(--space-sm);
+  margin-block-end: var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  letter-spacing: 1px;
+}
+
+/* ── Notes Modal Enhancements ── */
+.notes-modal-date {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-block-end: var(--space-sm);
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-footer-right {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.note-date {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  margin-block-start: 2px;
+}
+
+/* ── History Modal ── */
+.cc-history-plate {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  padding: var(--space-sm);
+  margin-block-end: var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  letter-spacing: 1px;
+}
+
+.cc-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.cc-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.cc-history-item .history-date {
+  font-weight: 600;
+}
+
+.cc-history-item .history-time {
+  color: var(--color-text-muted);
+}
+
+.cc-history-loading {
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--color-text-muted);
+}
+
+/* ── Mobile Layout ── */
+@media (max-width: 767px) {
+  .cc-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .cc-chart-doughnut {
+    max-width: 240px;
+  }
+
+  .cc-filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cc-filter-item {
+    width: 100%;
+  }
+
+  .cc-filter-search {
+    min-width: auto;
+  }
+
+  .cc-filter-select,
+  .cc-filter-date {
+    width: 100%;
+  }
+
+  /* Table → Card layout */
+  .table-wrapper {
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .data-table {
+    display: block;
+  }
+
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .data-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs) var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .data-table tbody tr:nth-child(even) {
+    background: var(--color-surface);
+  }
+
+  .data-table tbody td {
+    border: none;
+    padding: var(--space-xs) 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .data-table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-block-end: 2px;
+  }
+
+  /* Placa row spans full width */
+  .data-table tbody td.mobile-full {
+    grid-column: 1 / -1;
+  }
+
+  .data-table tbody td.mobile-header-cell {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-block-end: var(--space-sm);
+    border-block-end: 1px solid var(--color-border);
+    margin-block-end: var(--space-xs);
+  }
+
+  .data-table tbody td.mobile-header-cell::before {
+    display: none;
+  }
+
+  .data-table tbody td.mobile-footer-cell {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding-block-start: var(--space-sm);
+    border-block-start: 1px solid var(--color-border);
+    margin-block-start: var(--space-xs);
+  }
+
+  .data-table tbody td.mobile-footer-cell::before {
+    display: none;
+  }
+
+  .data-table .cell-notes {
+    max-width: none;
+    white-space: normal;
+  }
+
+  .cc-columns-dropdown {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+  }
+
+  .cc-exports-row {
+    flex-direction: column;
+  }
+
+  .cc-export-submenu {
+    flex-direction: column;
+  }
+}
+
+/* ── Tablet+ ── */
+@media (min-width: 768px) {
+  .cc-charts {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .cc-chart-doughnut {
+    max-width: none;
+  }
+}
