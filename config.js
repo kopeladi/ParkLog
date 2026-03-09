@@ -7,7 +7,7 @@ const CONFIG = {
   /**
    * Google Apps Script Web App URL
    * Set after Apps Script deployment (see SETUP_INSTRUCTIONS_HE.md)
-   * Example: https://script.google.com/macros/d/AKfycby.../usercontent
+   * Example: https://script.google.com/macros/s/AKfycby.../exec
    */
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzd96MPqGSAibRh1HltwhjDHqcLEVJeCl-DnfI9FRIFPwhzX0mlFlqTdaFDFyJX2pIrIA/exec',
 

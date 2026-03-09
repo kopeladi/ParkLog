@@ -37,7 +37,7 @@ Same as client setup (see SETUP_INSTRUCTIONS_HE.md):
 1. Create Google Sheet: "ParkLog Demo"
 2. Create Apps Script with Code.gs
 3. Deploy as Web App
-4. Save URL: `https://script.google.com/macros/d/[DEMO-ID]/usercontent`
+4. Save URL: `https://script.google.com/macros/s/[DEMO-ID]/exec`
 
 ### 2️⃣ Store URLs
 
@@ -50,7 +50,7 @@ cp .env.example .env
 Edit `.env`:
 ```
 # Demo — Your showcase
-APPS_SCRIPT_URL=https://script.google.com/macros/d/[DEMO-ID]/usercontent
+APPS_SCRIPT_URL=https://script.google.com/macros/s/[DEMO-ID]/exec
 
 APP_ENV=demo
 ```
@@ -60,7 +60,7 @@ APP_ENV=demo
 ```javascript
 // At deployment time, replace empty APPS_SCRIPT_URL with .env value
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/d/[DEMO-ID]/usercontent',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/[DEMO-ID]/exec',
   // ...
 };
 ```
@@ -75,7 +75,7 @@ Then commit & push → GitHub Pages auto-deploys ✅
 ```javascript
 // config.js
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/d/YOUR-DEMO-SCRIPT-ID/usercontent',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/YOUR-DEMO-SCRIPT-ID/exec',
   // ...
 };
 ```
@@ -84,7 +84,7 @@ const CONFIG = {
 ```javascript
 // config.js
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/d/CLIENT-SCRIPT-ID/usercontent',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/CLIENT-SCRIPT-ID/exec',
   // ...
 };
 ```
@@ -103,19 +103,19 @@ git push origin main
 
 ### .env (for local development)
 ```
-APPS_SCRIPT_URL=https://script.google.com/macros/d/AKfycby-Demo123/usercontent
+APPS_SCRIPT_URL=https://script.google.com/macros/s/AKfycby-Demo123/exec
 APP_ENV=development
 ```
 
 ### .env.demo (for sharing)
 ```
-APPS_SCRIPT_URL=https://script.google.com/macros/d/AKfycby-Demo123/usercontent
+APPS_SCRIPT_URL=https://script.google.com/macros/s/AKfycby-Demo123/exec
 APP_ENV=demo
 ```
 
 ### .env.production.client1 (for client 1)
 ```
-APPS_SCRIPT_URL=https://script.google.com/macros/d/AKfycby-Client1ID/usercontent
+APPS_SCRIPT_URL=https://script.google.com/macros/s/AKfycby-Client1ID/exec
 APP_ENV=production
 CLIENT_NAME=John's Parking
 ```
@@ -182,17 +182,22 @@ Each has its own Apps Script URL in config.js.
 
 Deploy to client's own GitHub Pages or custom domain.
 
-### Option C: One Repo, Switch URLs Locally
-Keep ONE repo, switch config.js before each deployment:
+### Option C: One Repo, Switch URLs Locally ⚠️ Not Recommended
+Keep ONE repo, switch config.js before each deployment.
+
+> **⚠️ Warning:** This approach uses `sed -i` which modifies files in-place without backup.
+> A typo in the command can corrupt `config.js`. There's also a risk of accidentally committing
+> the wrong client's URL, potentially mixing up client data. **Use only if you're comfortable with shell scripting and always verify with `git diff config.js` before pushing.**
+
 ```bash
 # For demo
-sed -i 's/APPS_SCRIPT_URL=.*/APPS_SCRIPT_URL=https:\/\/script.google.com\/macros\/d\/DEMO-ID\/usercontent/' config.js
+sed -i 's/APPS_SCRIPT_URL=.*/APPS_SCRIPT_URL=https:\/\/script.google.com\/macros\/s\/DEMO-ID\/exec/' config.js
 
 # For client-john
-sed -i 's/APPS_SCRIPT_URL=.*/APPS_SCRIPT_URL=https:\/\/script.google.com\/macros\/d\/JOHN-ID\/usercontent/' config.js
+sed -i 's/APPS_SCRIPT_URL=.*/APPS_SCRIPT_URL=https:\/\/script.google.com\/macros\/s\/JOHN-ID\/exec/' config.js
 ```
 
-**Simplest approach:** Use Option A (separate folders = separate GitHub Pages instances).
+**Recommended approach:** Use Option A (separate folders = separate GitHub Pages instances). Each client gets their own isolated deployment with no risk of data mixing.
 
 ---
 
@@ -200,7 +205,7 @@ sed -i 's/APPS_SCRIPT_URL=.*/APPS_SCRIPT_URL=https:\/\/script.google.com\/macros
 
 1. **Create:** Google Sheet + Apps Script (your account)
 2. **Deploy:** Apps Script Web App
-3. **Get URL:** `https://script.google.com/macros/d/[DEMO-ID]/usercontent`
+3. **Get URL:** `https://script.google.com/macros/s/[DEMO-ID]/exec`
 4. **Update:** `config.js` with Demo URL
 5. **Push:** `git commit -m "demo: initial demo setup"` → GitHub Pages
 6. **Share:** Send demo link to prospects

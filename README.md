@@ -18,8 +18,10 @@ Bilingual (Spanish/Hebrew) system for tracking vehicle entries in parking facili
 
 **Read these (in order):**
 1. [`SETUP_INSTRUCTIONS_HE.md`](SETUP_INSTRUCTIONS_HE.md) — Client setup (Google Sheet + Apps Script)
-2. [`DEPLOYMENT_GUIDE.md`](DEPLOYMENT_GUIDE.md) — Full deployment architecture & steps
-3. [`MULTI_ENVIRONMENT.md`](MULTI_ENVIRONMENT.md) — Demo + Production (managing multiple clients)
+2. [`CLIENT_APPS_SCRIPT_SETUP.md`](CLIENT_APPS_SCRIPT_SETUP.md) — Simplified one-pager to send directly to clients
+3. [`DEPLOYMENT_GUIDE.md`](DEPLOYMENT_GUIDE.md) — Full deployment architecture & steps
+4. [`MULTI_ENVIRONMENT.md`](MULTI_ENVIRONMENT.md) — Demo + Production (managing multiple clients)
+5. [`CHANGELOG.md`](CHANGELOG.md) — Version history and changes
 
 ---
 
@@ -82,8 +84,11 @@ git push origin main
 ```
 ParkLog/
 ├── README.md                      ← You are here
-├── SETUP_INSTRUCTIONS_HE.md       ← For client setup
+├── CHANGELOG.md                   ← Version history
+├── SETUP_INSTRUCTIONS_HE.md       ← For client setup (full guide)
+├── CLIENT_APPS_SCRIPT_SETUP.md    ← Send this to clients (simplified one-pager)
 ├── DEPLOYMENT_GUIDE.md            ← For deployment reference
+├── MULTI_ENVIRONMENT.md           ← Managing demo + multiple clients
 ├── CLAUDE.md                      ← Project specifications
 ├── index.html                     ← Landing page
 ├── vault-entry.html               ← Data entry form
@@ -91,6 +96,7 @@ ParkLog/
 ├── style.css, vault-entry.css, commandcenter.css
 ├── vault-entry.js, commandcenter.js, sheets.js, i18n.js
 ├── config.js                      ← ⭐ Update with Apps Script URL
+├── vercel.json                    ← Vercel deployment config (optional alternative to GitHub Pages)
 ├── apps-script/
 │   └── Code.gs                    ← Google Apps Script (client deploys)
 └── .github/

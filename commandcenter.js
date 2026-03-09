@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let sortConfig = { column: 'lastSeen', direction: 'desc' };
   let activeExportType = null;
   let editingVehicle = null; // { vehicleId, placa }
+  let lastFocusedElement = null; // for returning focus after modal close
   let weeklyChart = null;
   let ratioChart = null;
   let searchTimer = null;
@@ -902,6 +903,42 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ══════════════════════════════════════════
+     Modal Helpers
+     ══════════════════════════════════════════ */
+
+  /**
+   * Keyboard Tab trap — keeps focus cycling inside the given modal.
+   * Attach with addEventListener('keydown', trapTabInModal) on the modal element.
+   *
+   * @param {KeyboardEvent} e
+   */
+  function trapTabInModal(e) {
+    if (e.key !== 'Tab') return;
+
+    const modal = e.currentTarget;
+    const focusable = Array.from(modal.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+    )).filter(el => !el.closest('.hidden') && el.offsetParent !== null);
+
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  /* ══════════════════════════════════════════
      Notes Modal
      ══════════════════════════════════════════ */
 
@@ -910,6 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {Object} vehicle
    */
   function openNotesModal(vehicle) {
+    lastFocusedElement = document.activeElement; // save opener for focus return
     editingVehicle = { vehicleId: vehicle.vehicle_id, placa: vehicle.placa };
     notesModalPlaca.textContent = vehicle.placa;
     notesModalInput.value = vehicle.notes || '';
@@ -928,12 +966,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     notesModal.classList.add('active');
     notesModalInput.focus();
+
+    /* Tab trap: keep focus inside modal */
+    notesModal.addEventListener('keydown', trapTabInModal);
   }
 
-  /** Closes the notes modal. */
+  /** Closes the notes modal and returns focus to the opener. */
   function closeNotesModal() {
     notesModal.classList.remove('active');
+    notesModal.removeEventListener('keydown', trapTabInModal);
     editingVehicle = null;
+    if (lastFocusedElement) {
+      lastFocusedElement.focus();
+      lastFocusedElement = null;
+    }
   }
 
   /** Saves the edited notes to backend. */
@@ -1006,9 +1052,11 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {string} placa
    */
   async function openHistoryModal(vehicleId, placa) {
+    lastFocusedElement = document.activeElement; // save opener for focus return
     historyPlate.textContent = placa;
-    historyList.innerHTML = '<div class="cc-history-loading">' + t('loading') + '</div>';
+    setHistoryMessage('loading');
     historyModal.classList.add('active');
+    historyModal.addEventListener('keydown', trapTabInModal);
 
     try {
       let history;
@@ -1024,8 +1072,22 @@ document.addEventListener('DOMContentLoaded', () => {
       renderHistory(history);
 
     } catch (err) {
-      historyList.innerHTML = '<div class="cc-history-loading">' + t('msg.error.server') + '</div>';
+      setHistoryMessage('msg.error.server');
     }
+  }
+
+  /**
+   * Sets a single status/message inside the history list (no user data — safe).
+   * Replaces innerHTML concatenation with t() to avoid the pattern entirely.
+   *
+   * @param {string} i18nKey - Translation key
+   */
+  function setHistoryMessage(i18nKey) {
+    historyList.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'cc-history-loading';
+    div.textContent = t(i18nKey);
+    historyList.appendChild(div);
   }
 
   /**
@@ -1036,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', () => {
     historyList.innerHTML = '';
 
     if (history.length === 0) {
-      historyList.innerHTML = '<div class="cc-history-loading">' + t('empty.noEntries') + '</div>';
+      setHistoryMessage('empty.noEntries');
       return;
     }
 
@@ -1058,9 +1120,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /** Closes the history modal. */
+  /** Closes the history modal and returns focus to the opener. */
   function closeHistoryModal() {
     historyModal.classList.remove('active');
+    historyModal.removeEventListener('keydown', trapTabInModal);
+    if (lastFocusedElement) {
+      lastFocusedElement.focus();
+      lastFocusedElement = null;
+    }
   }
 
   /* ══════════════════════════════════════════
@@ -1075,6 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {'entries'|'new'} type - Which KPI list to show
    */
   function openKpiListModal(type) {
+    lastFocusedElement = document.activeElement; // save opener for focus return
     const todayStr = formatDateYMD(new Date());
     let vehicles = [];
     let title = '';
@@ -1127,13 +1195,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     kpiListModal.classList.add('active');
+    kpiListModal.addEventListener('keydown', trapTabInModal);
+    /* Focus the close button after opening */
+    kpiListModalClose.focus();
     lucide.createIcons();
   }
 
-  /** Closes the KPI list modal. */
+  /** Closes the KPI list modal and returns focus to the opener. */
   function closeKpiListModal() {
     kpiListModal.classList.remove('active');
+    kpiListModal.removeEventListener('keydown', trapTabInModal);
     kpiListPlates = [];
+    if (lastFocusedElement) {
+      lastFocusedElement.focus();
+      lastFocusedElement = null;
+    }
   }
 
   /** Copies the KPI list plates to clipboard. */

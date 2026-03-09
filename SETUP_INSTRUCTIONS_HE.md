@@ -53,13 +53,13 @@ const SHEET_ID = 'YOUR-SHEET-ID-HERE';
 ### ב. שמור את ה-URL
 - Apps Script יתן לך URL כמו זה:
 ```
-https://script.google.com/macros/d/[SCRIPT-ID]/usercontent
+https://script.google.com/macros/s/[SCRIPT-ID]/exec
 ```
 - **העתק את כל ה-URL הזה** ← תצטרכו להמשך!
 
 ---
 
-## שלב 4️⃣: הכנתקה ללמפתחת
+## שלב 4️⃣: העברה למפתחת
 
 **שלח ללמפתחת שלך:**
 1. ה-**Apps Script URL** מ-שלב 3ב
@@ -68,7 +68,7 @@ https://script.google.com/macros/d/[SCRIPT-ID]/usercontent
 דוגמה:
 ```
 Apps Script URL:
-https://script.google.com/macros/d/AKfycbx...../usercontent
+https://script.google.com/macros/s/AKfycbx...../exec
 
 Sheet ID:
 1a2b3c4d5e6f7g8h9i10j11k12l13m14
@@ -76,9 +76,16 @@ Sheet ID:
 
 ---
 
-## ✅ בדיקה
-- בחזור בחלק העליון של Apps Script → **Run** (מחובר ל-setupSheets())
-- אם אתה רואה בעיה — בחזור לשלב 3 ודא שה-SHEET-ID נכון
+## ✅ בדיקה — הרץ setupSheets() לפני Deploy
+
+לפני שתעשה Deploy, חשוב להריץ את הפונקציה setupSheets() פעם אחת כדי שהגיליון ייוצר עם הכותרות הנכונות:
+
+1. בחלק העליון של Apps Script Editor → לחץ על **dropdown** ובחר **setupSheets**
+2. לחץ ▶️ **Run**
+3. אפשר לך לתת הרשאה (Authorize) — זה בסדר, זה הסקריפט שלך
+4. בדוק ב-**Logs** (Tools → Logs): צריך לראות **"Sheets created/verified successfully!"**
+
+אם אתה רואה הודעת שגיאה — ודא שה-SHEET-ID בשורה `const SHEET_ID` נכון (ראה שלב 1ב)
 
 ---
 

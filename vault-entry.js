@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (!CONFIG.PLACA_PATTERN.test(placa)) {
+    if (!CONFIG.PLACA_PATTERN.test(placa) || placa.length > CONFIG.PLACA_MAX_LENGTH) {
       showError(t('msg.error.format'));
       placaInput.focus();
       return;
@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /** Updates the submit button enabled/disabled state. */
   function updateSubmitState() {
     const placa = placaInput.value.trim();
-    const isValid = placa.length >= CONFIG.PLACA_MIN_LENGTH && CONFIG.PLACA_PATTERN.test(placa);
+    const isValid = placa.length >= CONFIG.PLACA_MIN_LENGTH && placa.length <= CONFIG.PLACA_MAX_LENGTH && CONFIG.PLACA_PATTERN.test(placa);
     submitBtn.disabled = !isValid || submitCooldown;
   }
 

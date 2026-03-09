@@ -37,7 +37,7 @@ Once you have the Apps Script URL from client:
 1. **Update `config.js`:**
 ```javascript
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/d/[SCRIPT-ID]/usercontent',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/[SCRIPT-ID]/exec',
   // ... rest of config
 };
 ```

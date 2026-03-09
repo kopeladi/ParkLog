@@ -33,7 +33,7 @@
  * IMPORTANT: Replace with your Google Sheet ID from the URL:
  * https://docs.google.com/spreadsheets/d/[YOUR-SHEET-ID]/edit
  */
-const SHEET_ID = '1TuwykbcSHDLYfOIB7ZQlbe4XS5Pl-4wtpF0upaNJs18'; // ← YOUR SHEET ID
+const SHEET_ID = 'YOUR-SHEET-ID-HERE'; // ← החלף עם ה-Sheet ID שלך (ראה שלב 2)
 
 /** @const {string[]} Allowed origins for CORS */
 const ALLOWED_ORIGINS = [
@@ -177,7 +177,20 @@ function createEntry(data) {
   const placa = validatePlaca(data.placa);
   const tipo = validateTipo(data.tipo);
   const notes = validateNotes(data.notes || '');
-  const now = new Date();
+
+  /*
+   * Use the original client-side timestamp when the entry was queued offline.
+   * This ensures that "entry saved at 09:00 while offline, reconnected at 10:00"
+   * is recorded with entry_time = 09:00, not 10:00.
+   * Falls back to server time for live (non-queued) entries.
+   */
+  let now;
+  if (data.queuedAt) {
+    const parsed = new Date(data.queuedAt);
+    now = isNaN(parsed.getTime()) ? new Date() : parsed;
+  } else {
+    now = new Date();
+  }
   const dateStr = formatDate(now);
   const timeStr = formatTime(now);
 
@@ -718,13 +731,18 @@ function setupSheets() {
 
 ## 🔑 שלב 2️⃣: Sheet ID
 
-**בשורה 24 (בקוד לעיל), כבר הוספנו את ה-Sheet ID שלך:**
+**בשורה הראשונה של הקוד (const SHEET_ID), החלף את הטקסט `'YOUR-SHEET-ID-HERE'` עם ה-Sheet ID שלך:**
 
 ```javascript
-const SHEET_ID = '1TuwykbcSHDLYfOIB7ZQlbe4XS5Pl-4wtpF0upaNJs18';
+const SHEET_ID = 'YOUR-SHEET-ID-HERE'; // ← החלף עם ה-ID האמיתי שלך
 ```
 
-✅ **כבר בדוק ומוכן!**
+איפה מוצאים את ה-Sheet ID? ב-URL של ה-Google Sheet שלך:
+```
+https://docs.google.com/spreadsheets/d/[ZEH_SHEET_ID_SHELCHA]/edit
+```
+
+**⚠️ חשוב: ללא ה-Sheet ID הנכון, האפליקציה לא תעבוד!**
 
 ---
 
@@ -765,7 +783,7 @@ Who has access: Anyone
 
 ### ד. שמור את ה-URL
 ```
-https://script.google.com/macros/d/[SCRIPT-ID]/usercontent
+https://script.google.com/macros/s/[SCRIPT-ID]/exec
 ```
 
 **שלח את ה-URL הזה חזרה אליי!** ← זה כל מה שצריך 🎉

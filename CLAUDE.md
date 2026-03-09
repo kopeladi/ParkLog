@@ -32,7 +32,13 @@ Browser (frontend)          Google Cloud (backend)
 ## File Structure
 ```
 ParkLog/
-├── CLAUDE.md              ← This file
+├── CLAUDE.md                    ← This file (project specifications)
+├── CHANGELOG.md                 ← Version history and changes
+├── README.md                    ← Project overview and quick start
+├── SETUP_INSTRUCTIONS_HE.md     ← Full client setup guide (Hebrew)
+├── CLIENT_APPS_SCRIPT_SETUP.md  ← Simplified one-pager to send to clients
+├── DEPLOYMENT_GUIDE.md          ← Full deployment architecture & steps
+├── MULTI_ENVIRONMENT.md         ← Managing demo + multiple clients
 ├── docs/
 │   └── אפיון-מערכת-חניון-v5.docx  ← Full specification
 ├── index.html             ← Landing page
@@ -45,6 +51,8 @@ ParkLog/
 ├── commandcenter.js       ← Charts, filters, KPIs, exports
 ├── sheets.js              ← Abstraction layer — fetch() to Apps Script
 ├── i18n.js                ← Translation strings (ES + HE)
+├── config.js              ← ⭐ App configuration + Apps Script URL
+├── vercel.json            ← Vercel deployment config (alternative to GitHub Pages)
 ├── apps-script/
 │   └── Code.gs            ← Google Apps Script (deployed as Web App)
 ├── .gitignore             ← Blocks sensitive files
@@ -335,6 +343,258 @@ Friendly icons where appropriate.
 - [ ] Mobile-first responsive
 - [ ] WCAG AA contrast compliance
 - [ ] Touch targets minimum 44x44px
+
+## Testing Requirements
+
+### Usability Tests — run before every release
+These tests verify the system is usable by real employees in real parking conditions.
+
+#### VaultEntry (Mobile Form)
+- [ ] **Plate entry flow**: enter a new plate → badge 🟢 appears → save → success banner shows saved plate
+- [ ] **Known vehicle flow**: enter existing plate → badge 🔵 appears with last seen date → save succeeds
+- [ ] **Auto-uppercase**: typing lowercase letters in plate field converts to uppercase on every keystroke
+- [ ] **Validation feedback**: submit empty plate → inline error appears below field (not alert/popup)
+- [ ] **Offline banner**: disable network → orange/red offline indicator appears in header
+- [ ] **Queue & retry**: enter vehicle while offline → reconnect → entry sent automatically with original timestamp
+- [ ] **Double submit prevention**: click Save twice fast → button disabled after first click, only one entry created
+- [ ] **Session list**: after 3 new vehicle entries, running list appears below form with plate + time
+- [ ] **Copy plates button**: click "copy all plates" → clipboard contains newline-separated plate list
+- [ ] **RTL layout**: switch to Hebrew → form layout flips to right-to-left, all labels readable
+- [ ] **Mobile touch**: all buttons reachable with one thumb on 375px screen, no horizontal scroll
+- [ ] **Font size**: all text ≥ 16px on mobile — no pinch-zoom needed to read labels
+
+#### CommandCenter (Admin Dashboard)
+- [ ] **KPI cards load**: page loads → 4 KPI cards show real numbers (not 0 or skeleton) within 3s
+- [ ] **Charts render**: bar chart and doughnut chart render with data, legends visible
+- [ ] **Table sort**: click column header → rows re-sort, arrow icon shows direction
+- [ ] **Search filter**: type partial plate in search → table filters in real-time
+- [ ] **Date filter**: select date range → table and KPIs update to match range
+- [ ] **Edit notes**: click pencil icon on a row → modal opens → save → row updates without page reload
+- [ ] **Export new vehicles today**: click export button → clipboard or CSV contains only today's new plates
+- [ ] **Sticky header**: scroll table down → column headers remain visible
+- [ ] **Mobile table**: on 375px screen → table converts to card layout or scrolls horizontally with fixed first column
+- [ ] **Empty state**: filter to a date with no entries → friendly empty state message shown (not blank)
+- [ ] **Cached data**: disconnect network → dashboard shows last cached data + "last updated" timestamp
+
+#### Cross-cutting
+- [ ] **Language toggle**: switch ES ↔ HE → all UI text updates instantly, preference saved on refresh
+- [ ] **Loading states**: on slow network (throttle to 3G) → skeleton loaders appear, no layout shift
+- [ ] **Keyboard navigation**: Tab through all interactive elements in logical order, Enter/Space activates buttons
+
+---
+
+### Security Tests — run before every release
+These tests verify the system cannot be exploited by malicious users or data.
+
+#### Input Validation
+- [ ] **XSS — plate field**: enter `<script>alert(1)</script>` as plate → rejected by frontend validation, never reaches sheet
+- [ ] **XSS — notes field**: enter `<img src=x onerror=alert(1)>` in notes → rendered as plain text (textContent), no execution
+- [ ] **Plate format enforcement**: submit plate with spaces, special chars (`!@#`), or >10 chars → error message, no save
+- [ ] **Notes length cap**: paste 400-char string into notes → truncated or rejected at 300 chars (server-side enforced in Apps Script)
+- [ ] **Server-side re-validation**: send raw POST to Apps Script with malformed placa bypassing frontend → Apps Script returns 400 error
+
+#### API & Backend
+- [ ] **No API keys in frontend**: inspect `config.js`, `sheets.js`, all `.html` files → zero Sheets API keys, zero service account credentials
+- [ ] **CORS enforcement**: send request to Apps Script from unauthorized origin → Apps Script rejects with CORS error
+- [ ] **Apps Script URL not secret**: confirm Apps Script URL is the only "secret" in config — URL alone cannot read/write data without Apps Script logic
+
+#### Data Integrity
+- [ ] **Atomic write**: simulate network drop mid-save → no partial record exists in sheet (entry without matching vehicle, or vice versa)
+- [ ] **Duplicate prevention**: save same plate twice quickly → only one new-vehicle record created in Vehicles sheet
+- [ ] **UUID uniqueness**: check entry_id and vehicle_id columns in sheet — no duplicates across 100+ entries
+
+#### Environment
+- [ ] **`.env` not in git**: run `git log --all -- .env` → no commits contain `.env` file
+- [ ] **`.gitignore` active**: run `git status` — `.env` and any credentials file shown as ignored, not tracked
+- [ ] **Repo is private**: verify GitHub repo visibility is set to Private
+
+---
+
+### Functional Tests — run before every release
+These tests verify that business logic and core features behave exactly as specified.
+
+#### New / Known Vehicle Logic
+- [ ] **New vehicle created**: save a plate that doesn't exist → Vehicles sheet gets one new row with correct `vehicle_id`, `placa`, `tipo`, `first_seen`, `total_visits = 1`
+- [ ] **Known vehicle updated**: save an existing plate → `last_seen` updated to today, `total_visits` incremented by 1, no new row in Vehicles sheet
+- [ ] **Entries sheet always written**: both new and known vehicle saves → one new row added to Entries sheet with correct `entry_id`, `vehicle_id`, `placa`, `entry_date`, `entry_time`
+- [ ] **`first_seen` immutable**: save the same plate 3 times → `first_seen` in Vehicles sheet stays the date of first entry, never changes
+- [ ] **"New vehicles on date X" query**: filter CommandCenter by a past date → only vehicles whose `first_seen` equals that date appear as "new"
+- [ ] **Badge logic is real-time**: plate exists in sheet but session is fresh → still shows 🔵 known (not 🟢 new), confirming lookup hits sheet not local state
+
+#### Plate Validation Logic
+- [ ] **Valid plates accepted**: `ABC-123`, `XY01`, `MOTO-99` → save succeeds
+- [ ] **Too short rejected**: 1-char plate → error, no save
+- [ ] **Too long rejected**: 11-char plate → error, no save
+- [ ] **Invalid chars rejected**: plate with space, `ñ`, `@`, `.` → error, no save
+- [ ] **Auto-uppercase applied before validation**: type `abc123` → stored as `ABC123`
+
+#### KPI Calculations (CommandCenter)
+- [ ] **"Total entries today"**: count manually from Entries sheet for today → matches KPI card value
+- [ ] **"Weekly entries"**: ISO week (Mon–Sun), count from Entries sheet → matches KPI card value
+- [ ] **"New vehicles today"**: count Vehicles where `first_seen = today` → matches KPI card value
+- [ ] **"Total vehicles"**: count all rows in Vehicles sheet → matches KPI card value
+
+#### Export Logic
+- [ ] **Export "new vehicles today"**: result contains only plates where `first_seen = today`, no known vehicles
+- [ ] **Export by date range**: result contains only entries within the selected date range, no entries outside
+- [ ] **CSV format**: exported file opens correctly in Excel/Sheets — correct column headers, no encoding issues with special characters
+
+#### Offline Queue Logic
+- [ ] **Queue persists across reload**: go offline → save entry → reload page → queue still shows pending entry
+- [ ] **Timestamps preserved**: entry saved offline at 09:00 → reconnect at 10:00 → entry recorded in sheet with `entry_time = 09:00`, not 10:00
+- [ ] **Queue order maintained**: save 3 entries offline → reconnect → entries appear in Entries sheet in the same order they were saved
+
+---
+
+### Integration Tests — run before every release
+These tests verify correct communication between frontend, Apps Script, and Google Sheets.
+
+#### Frontend → Apps Script
+- [ ] **POST reaches Apps Script**: save a valid entry → Apps Script execution log shows the request
+- [ ] **Response parsed correctly**: Apps Script returns `{ success: true, data: {...} }` → frontend shows success banner with correct plate
+- [ ] **Error response handled**: Apps Script returns `{ success: false, error: "..." }` → frontend shows error toast, entry not marked as saved
+- [ ] **Timeout handled**: Apps Script takes >10s to respond → frontend shows retry toast, does not hang indefinitely
+
+#### Apps Script → Google Sheets
+- [ ] **Correct sheet targeted**: entries written to "Entries" tab, vehicle upserts to "Vehicles" tab — verify tab names in sheet
+- [ ] **Column order matches schema**: new row in Vehicles sheet has columns in exact order defined in data model
+- [ ] **Date/time format**: `entry_date` stored as `YYYY-MM-DD`, `entry_time` stored as `HH:MM:SS` — verify in sheet cell format
+- [ ] **UUID generated server-side**: `entry_id` and `vehicle_id` are non-empty UUIDs (format `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`), never empty
+
+#### `sheets.js` Abstraction
+- [ ] **URL sourced from `config.js`**: `sheets.js` reads `APPS_SCRIPT_URL` from config, not hardcoded — confirm by changing URL in config and verifying requests go to new URL
+- [ ] **60-second cache active**: load CommandCenter → wait <60s → reload → only 1 API call made (not 2)
+- [ ] **Cache invalidated on save**: save a new entry from VaultEntry → switch to CommandCenter → data refreshes immediately (new entry visible)
+
+---
+
+### Performance Tests — run before every release
+These tests verify the system is fast enough for real-world parking lot conditions.
+
+#### Load Times
+- [ ] **VaultEntry initial load**: page fully interactive in <2s on 4G connection (Chrome DevTools throttle)
+- [ ] **CommandCenter initial load**: KPI cards and charts visible in <3s on 4G connection
+- [ ] **Plate lookup response**: after typing plate + blur → badge appears in <1.5s on real network
+- [ ] **Save response**: tap Save → success banner appears in <2s on real network
+
+#### Large Dataset
+- [ ] **Table with 500+ entries**: CommandCenter loads and renders table without freeze or blank rows
+- [ ] **Search on large dataset**: filter table with 500+ rows → results appear in <300ms (no perceptible lag)
+- [ ] **Chart with 9 weeks of data**: bar chart renders all 9 bars without overflow or label collision
+
+#### Rate Limiting
+- [ ] **Client-side rate limit enforced**: trigger 3 API calls within 1 second → only 1 executes, others queued
+- [ ] **No memory leak**: keep VaultEntry open for 30 minutes, save 20 entries → browser memory stable (no continuous growth in DevTools)
+
+---
+
+### Accessibility Tests — run before every release
+These tests verify WCAG AA compliance and usability for all users.
+
+#### Color & Contrast
+- [ ] **Primary text contrast**: `#1E293B` on `#FFFFFF` passes WCAG AA (≥4.5:1) — verify with browser DevTools or axe
+- [ ] **Badge contrast**: 🟢 new vehicle badge text readable on green background — passes 4.5:1
+- [ ] **Error message contrast**: red error text on white background passes 4.5:1
+- [ ] **Grayscale test**: screenshot page in grayscale → all information still readable without color
+
+#### Keyboard & Screen Reader
+- [ ] **Full keyboard flow VaultEntry**: Tab → plate field → type plate → Tab → tipo → Tab → notes → Tab → Save → Enter — entire flow without mouse
+- [ ] **Modal keyboard trap — notes**: open notes edit modal → Tab cycles only within modal, not behind it → Escape closes modal
+- [ ] **Modal keyboard trap — history**: open vehicle history modal → Tab cycles only within modal, not behind it → Escape closes modal
+- [ ] **Modal keyboard trap — KPI list**: click KPI card → KPI list modal opens → Tab cycles only within modal → Escape closes modal
+- [ ] **Screen reader labels**: all icon-only buttons have `aria-label` — verify with VoiceOver (Mac) or NVDA (Windows)
+- [ ] **Live region on save**: after successful save, screen reader announces confirmation without user navigating to it
+- [ ] **Error announced**: submit invalid plate → screen reader announces error message
+
+#### Focus Management
+- [ ] **Focus visible on all elements**: Tab through entire page → every focused element shows visible outline (not hidden)
+- [ ] **Focus returns after modal close — notes**: open and close notes modal → focus returns to the pencil icon that opened it
+- [ ] **Focus returns after modal close — history**: open and close history modal → focus returns to the clock icon that opened it
+- [ ] **Focus returns after modal close — KPI list**: open and close KPI list modal → focus returns to the KPI card that opened it
+- [ ] **Skip link**: pressing Tab from top of CommandCenter → first focusable element is logical (not a hidden element)
+
+---
+
+### Compatibility Tests — run before every release
+These tests verify the system works across all target devices and browsers.
+
+#### Browsers (desktop)
+- [ ] **Chrome latest**: all features work, no console errors
+- [ ] **Safari latest**: date inputs render correctly, clipboard API works
+- [ ] **Firefox latest**: Chart.js renders, CSS Grid layout intact
+- [ ] **Edge latest**: no regressions vs Chrome
+
+#### Devices (mobile)
+- [ ] **iPhone SE (375px)**: VaultEntry single-column, all buttons reachable with one thumb
+- [ ] **iPhone 14 (390px)**: no horizontal scroll, badge visible without scrolling
+- [ ] **Android mid-range (360px)**: form renders correctly, touch targets ≥44px
+- [ ] **iPad (768px)**: CommandCenter switches to tablet layout, charts visible
+
+#### OS & Input
+- [ ] **iOS Safari — clipboard**: "copy plates" button works (iOS requires user gesture, no silent fail)
+- [ ] **Android Chrome — offline**: offline banner appears when network disabled in Android settings
+- [ ] **Physical keyboard on tablet**: Tab navigation works, no invisible focus issues
+
+---
+
+### Localization Tests — run before every release
+These tests verify correct behavior in both Spanish and Hebrew, including RTL layout.
+
+#### Language Switching
+- [ ] **All UI strings translated**: switch to Hebrew → zero visible Spanish text remains in UI (no untranslated keys showing raw `t('key')` output)
+- [ ] **All UI strings translated**: switch to Spanish → zero visible Hebrew text remains in UI
+- [ ] **Preference persists**: set language to Hebrew → close tab → reopen → Hebrew still active
+
+#### RTL Layout
+- [ ] **Form flips correctly**: switch to Hebrew → form labels align right, inputs extend left, no text truncation
+- [ ] **Badges align correctly**: 🟢/🔵 badges appear on the correct side in RTL layout
+- [ ] **Table mirrors correctly**: CommandCenter in Hebrew → first column (placa) is on the right, sort arrows flip direction
+- [ ] **No LTR leakage**: plate number (always LTR) displays correctly inside RTL layout — no character reversal
+
+#### Data Display
+- [ ] **Dates display correctly in both languages**: `first_seen` date shown in same format regardless of language
+- [ ] **Plate numbers unaffected by language**: `ABC-123` always displays as `ABC-123`, never reversed in RTL mode
+
+---
+
+### Regression Tests — run after every code change
+These tests catch unintended side effects when modifying existing code.
+
+#### After any change to `sheets.js`
+- [ ] VaultEntry save still works end-to-end
+- [ ] CommandCenter data still loads
+- [ ] Offline queue still retries on reconnect
+- [ ] Offline queue sends `queuedAt` timestamp — save entry offline → reconnect → verify `entry_time` in sheet matches original offline time, not reconnect time
+
+#### After any change to `vault-entry.js`
+- [ ] New vehicle badge appears correctly
+- [ ] Known vehicle badge appears with correct `last_seen` date
+- [ ] Session list updates after each new vehicle save
+
+#### After any change to `commandcenter.js`
+- [ ] All 4 KPI cards show correct values
+- [ ] Both charts render without errors
+- [ ] Table search and sort still function
+- [ ] Notes edit modal opens, saves, and closes correctly
+- [ ] History modal opens with vehicle history and closes correctly
+- [ ] KPI list modal opens when clicking KPI card and closes correctly
+- [ ] Focus returns to the opener element after closing any modal (notes, history, KPI list)
+- [ ] Tab key does not escape any open modal to background page
+
+#### After any change to `i18n.js`
+- [ ] Language switch ES ↔ HE works without page reload
+- [ ] No `undefined` or raw key strings visible in UI in either language
+
+#### After any change to `config.js`
+- [ ] Apps Script URL reaches correct endpoint
+- [ ] No API keys accidentally introduced
+
+#### After any change to `style.css`
+- [ ] VaultEntry renders correctly on 375px screen
+- [ ] CommandCenter renders correctly at 1024px
+- [ ] No WCAG AA contrast regressions (run axe or check DevTools)
+
+---
 
 ## Phase 2 — Future Enhancements
 - Authentication: passphrase (simple) → full auth system

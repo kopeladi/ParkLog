@@ -16,6 +16,10 @@ const DataStore = (() => {
 
   /* ── Rate Limiting ── */
   let lastRequestTime = 0;
+  let rateLimitPending = false;
+
+  /* ── Fetch Timeout ── */
+  const FETCH_TIMEOUT_MS = 10000;
 
   /* ── Offline Queue ── */
   const QUEUE_KEY = 'parklog-offline-queue';
@@ -39,10 +43,22 @@ const DataStore = (() => {
       }
     });
 
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      redirect: 'follow'
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    let response;
+    try {
+      response = await fetch(url.toString(), {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller.signal
+      });
+    } catch (err) {
+      if (err.name === 'AbortError') throw new Error('Request timed out');
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
@@ -66,12 +82,25 @@ const DataStore = (() => {
   async function apiPost(body) {
     await rateLimit();
 
-    const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(body)
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    let response;
+    try {
+      response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        // text/plain avoids CORS preflight — Apps Script reads via e.postData.contents
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+    } catch (err) {
+      if (err.name === 'AbortError') throw new Error('Request timed out');
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
@@ -90,12 +119,16 @@ const DataStore = (() => {
    * @returns {Promise<void>}
    */
   async function rateLimit() {
+    // Update lastRequestTime before the await to prevent parallel calls
+    // from both passing the check before either one updates the timestamp.
     const now = Date.now();
     const elapsed = now - lastRequestTime;
     if (elapsed < CONFIG.RATE_LIMIT_MS) {
+      lastRequestTime = now + (CONFIG.RATE_LIMIT_MS - elapsed);
       await new Promise(resolve => setTimeout(resolve, CONFIG.RATE_LIMIT_MS - elapsed));
+    } else {
+      lastRequestTime = now;
     }
-    lastRequestTime = Date.now();
   }
 
   /**
@@ -164,7 +197,11 @@ const DataStore = (() => {
 
     for (const item of queue) {
       try {
-        await apiPost({ action: 'createEntry', data: item.data });
+        /* Pass original queued timestamp so Apps Script preserves it */
+        const payload = item.timestamp
+          ? { ...item.data, queuedAt: item.timestamp }
+          : item.data;
+        await apiPost({ action: 'createEntry', data: payload });
         sent++;
       } catch {
         remaining.push(item);

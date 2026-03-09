@@ -161,7 +161,20 @@ function createEntry(data) {
   const placa = validatePlaca(data.placa);
   const tipo = validateTipo(data.tipo);
   const notes = validateNotes(data.notes || '');
-  const now = new Date();
+
+  /*
+   * Use the original client-side timestamp when the entry was queued offline.
+   * This ensures that "entry saved at 09:00 while offline, reconnected at 10:00"
+   * is recorded with entry_time = 09:00, not 10:00.
+   * Falls back to server time for live (non-queued) entries.
+   */
+  let now;
+  if (data.queuedAt) {
+    const parsed = new Date(data.queuedAt);
+    now = isNaN(parsed.getTime()) ? new Date() : parsed;
+  } else {
+    now = new Date();
+  }
   const dateStr = formatDate(now);
   const timeStr = formatTime(now);
 
