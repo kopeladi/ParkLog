@@ -285,15 +285,15 @@ function getVehicles(filters) {
   for (let i = 1; i < data.length; i++) {
     const row = rowToObject(headers, data[i]);
     const vehicle = {
-      vehicleId: row.vehicle_id,
+      vehicle_id: row.vehicle_id,
       placa: row.placa,
       tipo: row.tipo,
-      firstSeen: formatDate(row.first_seen),
-      lastSeen: formatDate(row.last_seen),
-      totalVisits: row.total_visits,
+      first_seen: formatDate(row.first_seen),
+      last_seen: formatDate(row.last_seen),
+      total_visits: row.total_visits,
       notes: row.notes || '',
-      notesUpdated: formatDate(row.notes_updated) || '',
-      createdBy: row.created_by || 'anonymous'
+      notes_updated: formatDate(row.notes_updated) || '',
+      created_by: row.created_by || 'anonymous'
     };
 
     /* Apply filters */
@@ -555,11 +555,11 @@ function formatDate(date) {
     if (date.match(/^\d{4}-\d{2}-\d{2}$/)) return date;
     date = new Date(date);
   }
-  if (!(date instanceof Date) || isNaN(date)) return '';
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return y + '-' + m + '-' + d;
+  if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+  // Use Utilities.formatDate so the result is always in the script's timezone,
+  // not UTC. Without this, date.getDate() returns the UTC day which can be
+  // one day behind for users in UTC+ timezones (e.g. Israel).
+  return Utilities.formatDate(date, Session.getScriptTimeZone(), 'yyyy-MM-dd');
 }
 
 /**
@@ -569,9 +569,7 @@ function formatDate(date) {
  * @returns {string}
  */
 function formatTime(date) {
-  const h = String(date.getHours()).padStart(2, '0');
-  const m = String(date.getMinutes()).padStart(2, '0');
-  return h + ':' + m;
+  return Utilities.formatDate(date, Session.getScriptTimeZone(), 'HH:mm');
 }
 
 /**
@@ -582,9 +580,10 @@ function formatTime(date) {
  */
 function getWeekStart(date) {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
+  // Use UTC methods to avoid timezone shifts when adjusting days
+  const day = d.getUTCDay();
+  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+  d.setUTCDate(diff);
   return formatDate(d);
 }
 

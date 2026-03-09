@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentVehicle = null; // { isNew, vehicle } from lookup
   let selectedTipo = CONFIG.DEFAULT_VEHICLE_TYPE;
   let lookupTimer = null;
+  let lookupGeneration = 0; // incremented each lookup — stale results are discarded
   let submitCooldown = false;
 
   /* ── Session Storage Key ── */
@@ -135,6 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
    * @returns {Promise<void>}
    */
   async function lookupVehicle(placa) {
+    const gen = ++lookupGeneration; // capture this lookup's generation
+
     if (!CONFIG.APPS_SCRIPT_URL) {
       /* Dev mode: simulate lookup */
       currentVehicle = { isNew: true, vehicle: null };
@@ -147,14 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const result = await DataStore.searchVehicle(placa);
+      if (gen !== lookupGeneration) return; // a newer lookup is in flight — discard
       currentVehicle = result;
       showStatusBadge(result.isNew, result.vehicle);
     } catch (err) {
+      if (gen !== lookupGeneration) return;
       /* Network failure: allow save without badge */
       currentVehicle = { isNew: null, vehicle: null };
     } finally {
-      showSpinner(false);
-      updateSubmitState();
+      if (gen === lookupGeneration) {
+        showSpinner(false);
+        updateSubmitState();
+      }
     }
   }
 
