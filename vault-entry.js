@@ -656,13 +656,15 @@ document.addEventListener('DOMContentLoaded', () => {
           timeEl.className = 've-history-time';
           timeEl.textContent = entry.time || '';
 
-          const noteEl = document.createElement('span');
-          noteEl.className = 've-history-note';
-          noteEl.textContent = entry.notes || '';
-
           item.appendChild(dateEl);
           item.appendChild(timeEl);
-          item.appendChild(noteEl);
+
+          if (entry.notes) {
+            const noteEl = document.createElement('span');
+            noteEl.className = 've-history-note';
+            noteEl.textContent = entry.notes;
+            item.appendChild(noteEl);
+          }
           veHistoryBody.appendChild(item);
         });
         veHistoryCopy.classList.remove('hidden');
