@@ -118,7 +118,7 @@
     .ph-login-card { background: #fff; border-radius: 16px; padding: 16px; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,.1); text-align: center; }
     .ph-login-logo { font-size: 1.8rem; margin-bottom: 6px; }
     .ph-login-title { font-size: .82rem; font-weight: 700; margin-bottom: 12px; }
-    .ph-login-field { border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: .7rem; margin-bottom: 6px; text-align: right; width: 100%; }
+    .ph-login-field { border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: .7rem; margin-bottom: 6px; text-align: right; width: 100%; color: var(--muted); }
     .ph-landing-body { padding: 14px 12px; background: var(--bg); min-height: 340px; }
     .ph-landing-hero { text-align: center; padding: 10px 0 14px; }
     .ph-landing-logo { font-size: 2rem; }
@@ -187,14 +187,14 @@
         <div class="ph-landing-hero">
           <div class="ph-landing-logo">🅿️</div>
           <div class="ph-landing-title">ParkLog</div>
-          <div class="ph-landing-sub">מערכת ניהול כניסות רכבים</div>
+          <div class="ph-landing-sub" data-t="ph.s0.sub">מערכת ניהול כניסות רכבים</div>
           <div style="margin-top:8px">
             <span style="border:1.5px solid #4F46E5;border-radius:6px;padding:2px 6px;font-size:.62rem;margin-left:4px">ES 🇪🇸</span>
             <span style="border:1.5px solid #ccc;border-radius:6px;padding:2px 6px;font-size:.62rem;opacity:.5">HE 🇮🇱</span>
           </div>
         </div>
-        <div class="ph-landing-card"><div class="ph-landing-icon">🚗</div><div><h5>ListaCarro</h5><p>בדיקת רכבים — הזנת כניסות</p></div></div>
-        <div class="ph-landing-card"><div class="ph-landing-icon">📊</div><div><h5>CommandCenter</h5><p>דשבורד ניהולי — נתונים ודוחות</p></div></div>
+        <div class="ph-landing-card"><div class="ph-landing-icon">🚗</div><div><h5>ListaCarro</h5><p data-t="ph.s0.ve">בדיקת רכבים — הזנת כניסות</p></div></div>
+        <div class="ph-landing-card"><div class="ph-landing-icon">📊</div><div><h5>CommandCenter</h5><p data-t="ph.s0.cc">דשבורד ניהולי — נתונים ודוחות</p></div></div>
       </div>
     </div></div>
     <div class="screen-info">
@@ -223,11 +223,11 @@
     <div class="phone-wrap"><div class="phone">
       <div class="ph-login-body"><div class="ph-login-card">
         <div class="ph-login-logo">🅿️</div>
-        <div class="ph-login-title">כניסה — ListaCarro</div>
-        <input class="ph-login-field" placeholder="שם משתמש" readonly>
-        <input class="ph-login-field" placeholder="••••••••" readonly style="margin-bottom:10px">
-        <div class="ph-btn block" style="font-size:.75rem">כניסה</div>
-        <div style="margin-top:8px;font-size:.62rem;color:#4F46E5;text-align:center">← חזרה לדף הבית</div>
+        <div class="ph-login-title" data-t="ph.s1.title">כניסה — ListaCarro</div>
+        <div class="ph-login-field" data-t="ph.s1.user">שם משתמש</div>
+        <div class="ph-login-field" style="margin-bottom:10px;letter-spacing:3px">••••••••</div>
+        <div class="ph-btn block" style="font-size:.75rem" data-t="ph.s1.btn">כניסה</div>
+        <div style="margin-top:8px;font-size:.62rem;color:#4F46E5;text-align:center" data-t="ph.s1.back">← חזרה לדף הבית</div>
       </div></div>
     </div></div>
     <div class="screen-info">
@@ -257,21 +257,33 @@
     <div class="phone-wrap"><div class="phone">
       <div class="ph-header">
         <div class="ph-back">←</div>
-        <div style="text-align:center"><div style="font-size:.82rem;font-weight:700">ListaCarro</div><div style="font-size:.6rem;opacity:.75">בדיקת רכבים</div></div>
-        <div style="display:flex;gap:4px;align-items:center"><div class="ph-user-btn">👤 מוריה ✕</div><div class="ph-lang">ES</div></div>
+        <div style="text-align:center">
+          <div style="font-size:.82rem;font-weight:700" data-t="ph.ve.title">בדיקת רכבים</div>
+          <div style="font-size:.6rem;opacity:.75" data-t="ph.ve.subtitle">ListaCarro</div>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <div class="ph-user-btn" data-t="ph.user">👤 מוריה ✕</div>
+          <div class="ph-lang" data-t="ph.lang">HE</div>
+        </div>
       </div>
       <div class="ph-body"><div class="ph-card">
-        <div class="ph-label">מספר לוחית</div>
+        <div class="ph-label" data-t="ph.label.plate">מספר לוחית</div>
         <div class="ph-input focused">ABC223</div>
         <div class="ph-badge new">
           <div class="ph-badge-icon">🟢</div>
-          <div><div class="ph-badge-title" style="color:#10B981">רכב חדש</div><div class="ph-badge-sub">רכב זה לא היה כאן בעבר</div></div>
+          <div>
+            <div class="ph-badge-title" style="color:#10B981" data-t="ph.badge.new.title">רכב חדש</div>
+            <div class="ph-badge-sub" data-t="ph.badge.new.sub">רכב זה לא היה כאן בעבר</div>
+          </div>
         </div>
-        <div class="ph-label">סוג רכב</div>
-        <div class="ph-type-row"><div class="ph-type-btn active">🚗 מכונית</div><div class="ph-type-btn">🛵 אופנוע</div></div>
-        <div class="ph-label">הערות (אופציונלי)</div>
-        <div class="ph-input" style="color:#aaa;font-weight:400;font-size:.7rem">סוטנו 2, כניסה ראשית...</div>
-        <div class="ph-btn block">💾 שמור כניסה</div>
+        <div class="ph-label" data-t="ph.label.tipo">סוג רכב</div>
+        <div class="ph-type-row">
+          <div class="ph-type-btn active" data-t="ph.tipo.auto">🚗 מכונית</div>
+          <div class="ph-type-btn" data-t="ph.tipo.moto">🛵 אופנוע</div>
+        </div>
+        <div class="ph-label" data-t="ph.label.notes">הערות (אופציונלי)</div>
+        <div class="ph-input" style="color:#aaa;font-weight:400;font-size:.7rem" data-t="ph.notes.ph">סוטנו 2, כניסה ראשית...</div>
+        <div class="ph-btn block" data-t="ph.btn.save">💾 שמור כניסה</div>
       </div></div>
     </div></div>
     <div class="screen-info">
@@ -302,25 +314,34 @@
     <div class="phone-wrap"><div class="phone">
       <div class="ph-header">
         <div class="ph-back">←</div>
-        <div style="text-align:center"><div style="font-size:.82rem;font-weight:700">ListaCarro</div><div style="font-size:.6rem;opacity:.75">בדיקת רכבים</div></div>
-        <div style="display:flex;gap:4px;align-items:center"><div class="ph-user-btn">👤 מוריה ✕</div><div class="ph-lang">ES</div></div>
+        <div style="text-align:center">
+          <div style="font-size:.82rem;font-weight:700" data-t="ph.ve.title">בדיקת רכבים</div>
+          <div style="font-size:.6rem;opacity:.75" data-t="ph.ve.subtitle">ListaCarro</div>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <div class="ph-user-btn" data-t="ph.user">👤 מוריה ✕</div>
+          <div class="ph-lang" data-t="ph.lang">HE</div>
+        </div>
       </div>
       <div class="ph-body"><div class="ph-card">
-        <div class="ph-label">מספר לוחית</div>
+        <div class="ph-label" data-t="ph.label.plate">מספר לוחית</div>
         <div class="ph-input focused">AAA111</div>
         <div class="ph-badge known" style="cursor:pointer">
           <div class="ph-badge-icon">🔵</div>
           <div>
-            <div class="ph-badge-title" style="color:#3B82F6">רכב מוכר</div>
-            <div class="ph-badge-sub">ביקור אחרון: 09/03/2026 — 7 ביקורים בסה"כ</div>
-            <div class="ph-badge-hint">🔍 לחץ לצפייה בהיסטוריית ביקורים</div>
+            <div class="ph-badge-title" style="color:#3B82F6" data-t="ph.badge.known.title">רכב מוכר</div>
+            <div class="ph-badge-sub" data-t="ph.badge.known.sub">ביקור אחרון: 09/03/2026 — 7 ביקורים בסה"כ</div>
+            <div class="ph-badge-hint" data-t="ph.badge.known.hint">🔍 לחץ לצפייה בהיסטוריית ביקורים</div>
           </div>
         </div>
-        <div class="ph-label">סוג רכב</div>
-        <div class="ph-type-row"><div class="ph-type-btn active">🚗 מכונית</div><div class="ph-type-btn">🛵 אופנוע</div></div>
-        <div class="ph-label">הערות (אופציונלי)</div>
-        <div class="ph-input" style="color:#aaa;font-weight:400;font-size:.7rem">הערות אופציונליות...</div>
-        <div class="ph-btn block">💾 שמור כניסה</div>
+        <div class="ph-label" data-t="ph.label.tipo">סוג רכב</div>
+        <div class="ph-type-row">
+          <div class="ph-type-btn active" data-t="ph.tipo.auto">🚗 מכונית</div>
+          <div class="ph-type-btn" data-t="ph.tipo.moto">🛵 אופנוע</div>
+        </div>
+        <div class="ph-label" data-t="ph.label.notes">הערות (אופציונלי)</div>
+        <div class="ph-input" style="color:#aaa;font-weight:400;font-size:.7rem" data-t="ph.notes.ph2">הערות אופציונליות...</div>
+        <div class="ph-btn block" data-t="ph.btn.save">💾 שמור כניסה</div>
       </div></div>
     </div></div>
     <div class="screen-info">
@@ -350,18 +371,41 @@
     <div class="phone-wrap"><div class="phone">
       <div class="ph-header">
         <div class="ph-back">←</div>
-        <div style="text-align:center"><div style="font-size:.82rem;font-weight:700">ListaCarro</div></div>
-        <div class="ph-lang">ES</div>
+        <div style="text-align:center">
+          <div style="font-size:.82rem;font-weight:700" data-t="ph.ve.title">בדיקת רכבים</div>
+        </div>
+        <div class="ph-lang" data-t="ph.lang">HE</div>
       </div>
       <div class="ph-body" style="padding:8px">
         <div class="ph-modal-overlay"><div class="ph-modal">
-          <div class="ph-modal-header"><span>היסטוריית ביקורים</span><span class="ph-close">✕</span></div>
+          <div class="ph-modal-header">
+            <span data-t="ph.history.title">היסטוריית ביקורים</span>
+            <span class="ph-close">✕</span>
+          </div>
           <div class="ph-modal-plate">AAA111</div>
-          <div class="ph-history-row"><span class="ph-history-date">10/03/2026</span><span class="ph-history-time">09:56</span><span class="ph-history-note">סוטנו 2 כניסה ראשית</span></div>
-          <div class="ph-history-row"><span class="ph-history-date">09/03/2026</span><span class="ph-history-time">23:11</span><span class="ph-history-note">top</span></div>
-          <div class="ph-history-row"><span class="ph-history-date">09/03/2026</span><span class="ph-history-time">21:16</span></div>
-          <div class="ph-history-row"><span class="ph-history-date">08/03/2026</span><span class="ph-history-time">20:29</span><span class="ph-history-note">כניסה דרומית</span></div>
-          <div class="ph-modal-footer"><span class="ph-copy-btn">העתק טבלה</span><span class="ph-close-btn">סגור</span></div>
+          <div class="ph-history-row">
+            <span class="ph-history-date">10/03/2026</span>
+            <span class="ph-history-time">09:56</span>
+            <span class="ph-history-note" data-t="ph.history.note1">סוטנו 2 כניסה ראשית</span>
+          </div>
+          <div class="ph-history-row">
+            <span class="ph-history-date">09/03/2026</span>
+            <span class="ph-history-time">23:11</span>
+            <span class="ph-history-note">top</span>
+          </div>
+          <div class="ph-history-row">
+            <span class="ph-history-date">09/03/2026</span>
+            <span class="ph-history-time">21:16</span>
+          </div>
+          <div class="ph-history-row">
+            <span class="ph-history-date">08/03/2026</span>
+            <span class="ph-history-time">20:29</span>
+            <span class="ph-history-note" data-t="ph.history.note2">כניסה דרומית</span>
+          </div>
+          <div class="ph-modal-footer">
+            <span class="ph-copy-btn" data-t="ph.copy.table">העתק טבלה</span>
+            <span class="ph-close-btn" data-t="ph.close">סגור</span>
+          </div>
         </div></div>
       </div>
     </div></div>
@@ -393,20 +437,22 @@
     <div class="phone-wrap"><div class="phone">
       <div class="ph-header">
         <div class="ph-back">←</div>
-        <div style="text-align:center"><div style="font-size:.82rem;font-weight:700">ListaCarro</div></div>
-        <div class="ph-lang">ES</div>
+        <div style="text-align:center">
+          <div style="font-size:.82rem;font-weight:700" data-t="ph.ve.title">בדיקת רכבים</div>
+        </div>
+        <div class="ph-lang" data-t="ph.lang">HE</div>
       </div>
       <div class="ph-body"><div class="ph-card" style="padding:10px 12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="ph-section-title">כניסות בסשן זה</div>
+          <div class="ph-section-title" data-t="ph.session.title">כניסות בסשן זה</div>
           <div style="background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px;font-size:.65rem;font-weight:700">5</div>
         </div>
-        <div class="ph-session-item"><span class="ph-session-placa">AAA111</span><span>09:56</span><span class="ph-session-badge known">מוכר</span></div>
-        <div class="ph-session-item"><span class="ph-session-placa">ABC223</span><span>09:41</span><span class="ph-session-badge new">חדש</span></div>
-        <div class="ph-session-item"><span class="ph-session-placa">XYZ789</span><span>09:30</span><span class="ph-session-badge known">מוכר</span></div>
-        <div class="ph-session-item"><span class="ph-session-placa">DEF456</span><span>09:12</span><span class="ph-session-badge new">חדש</span></div>
-        <div class="ph-session-item" style="border:none"><span class="ph-session-placa">GHI321</span><span>08:55</span><span class="ph-session-badge known">מוכר</span></div>
-        <div class="ph-btn" style="margin-top:10px;background:#F1F5F9;color:var(--text);font-size:.68rem;border-radius:8px;padding:6px;text-align:center">📋 העתק רשימה</div>
+        <div class="ph-session-item"><span class="ph-session-placa">AAA111</span><span>09:56</span><span class="ph-session-badge known" data-t="ph.badge.known.sm">מוכר</span></div>
+        <div class="ph-session-item"><span class="ph-session-placa">ABC223</span><span>09:41</span><span class="ph-session-badge new" data-t="ph.badge.new.sm">חדש</span></div>
+        <div class="ph-session-item"><span class="ph-session-placa">XYZ789</span><span>09:30</span><span class="ph-session-badge known" data-t="ph.badge.known.sm">מוכר</span></div>
+        <div class="ph-session-item"><span class="ph-session-placa">DEF456</span><span>09:12</span><span class="ph-session-badge new" data-t="ph.badge.new.sm">חדש</span></div>
+        <div class="ph-session-item" style="border:none"><span class="ph-session-placa">GHI321</span><span>08:55</span><span class="ph-session-badge known" data-t="ph.badge.known.sm">מוכר</span></div>
+        <div class="ph-btn" style="margin-top:10px;background:#F1F5F9;color:var(--text);font-size:.68rem;border-radius:8px;padding:6px;text-align:center" data-t="ph.copy.list">📋 העתק רשימה</div>
       </div></div>
     </div></div>
     <div class="screen-info">
@@ -437,17 +483,23 @@
     <div class="phone-wrap"><div class="phone">
       <div class="ph-header">
         <div class="ph-back">←</div>
-        <div style="text-align:center"><div style="font-size:.82rem;font-weight:700">CommandCenter</div><div style="font-size:.6rem;opacity:.75">קומנדסנטר</div></div>
-        <div style="display:flex;gap:4px;align-items:center"><div class="ph-user-btn">👤 מנהל ✕</div><div class="ph-lang">HE</div></div>
+        <div style="text-align:center">
+          <div style="font-size:.82rem;font-weight:700">CommandCenter</div>
+          <div style="font-size:.6rem;opacity:.75" data-t="ph.cc.subtitle">קומנדסנטר</div>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <div class="ph-user-btn" data-t="ph.manager">👤 מנהל ✕</div>
+          <div class="ph-lang" data-t="ph.lang.cc">HE</div>
+        </div>
       </div>
       <div class="ph-body" style="padding:8px">
         <div class="ph-kpi-grid">
-          <div class="ph-kpi" style="cursor:pointer"><div class="ph-kpi-val">12</div><div class="ph-kpi-lbl">כניסות היום</div></div>
-          <div class="ph-kpi" style="cursor:pointer"><div class="ph-kpi-val">4</div><div class="ph-kpi-lbl">חדשים מהיום</div></div>
-          <div class="ph-kpi"><div class="ph-kpi-val">87</div><div class="ph-kpi-lbl">סה"כ רכבים</div></div>
-          <div class="ph-kpi"><div class="ph-kpi-val">38</div><div class="ph-kpi-lbl">כניסות השבוע</div></div>
+          <div class="ph-kpi" style="cursor:pointer"><div class="ph-kpi-val">12</div><div class="ph-kpi-lbl" data-t="ph.kpi.today">כניסות היום</div></div>
+          <div class="ph-kpi" style="cursor:pointer"><div class="ph-kpi-val">4</div><div class="ph-kpi-lbl" data-t="ph.kpi.new">חדשים מהיום</div></div>
+          <div class="ph-kpi"><div class="ph-kpi-val">87</div><div class="ph-kpi-lbl" data-t="ph.kpi.total">סה"כ רכבים</div></div>
+          <div class="ph-kpi"><div class="ph-kpi-val">38</div><div class="ph-kpi-lbl" data-t="ph.kpi.week">כניסות השבוע</div></div>
         </div>
-        <div style="font-size:.6rem;color:var(--muted);margin-bottom:3px;font-weight:600">כניסות לפי שבוע</div>
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:3px;font-weight:600" data-t="ph.chart.weekly">כניסות לפי שבוע</div>
         <div class="ph-chart-bar">
           <div class="ph-bar" style="height:30%"></div><div class="ph-bar" style="height:55%"></div>
           <div class="ph-bar" style="height:40%"></div><div class="ph-bar" style="height:70%"></div>
@@ -455,12 +507,12 @@
           <div class="ph-bar" style="height:60%"></div><div class="ph-bar" style="height:90%"></div>
           <div class="ph-bar" style="height:50%"></div>
         </div>
-        <div style="font-size:.6rem;color:var(--muted);margin-bottom:3px;font-weight:600">חדשים מול מוכרים</div>
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:3px;font-weight:600" data-t="ph.chart.donut">חדשים מול מוכרים</div>
         <div class="ph-donut-wrap">
           <div class="ph-donut"></div>
           <div class="ph-donut-legend">
-            <div><div class="ph-dot" style="background:var(--green)"></div><span>חדשים — 4</span></div>
-            <div><div class="ph-dot" style="background:var(--blue)"></div><span>מוכרים — 8</span></div>
+            <div><div class="ph-dot" style="background:var(--green)"></div><span data-t="ph.legend.new">חדשים — 4</span></div>
+            <div><div class="ph-dot" style="background:var(--blue)"></div><span data-t="ph.legend.known">מוכרים — 8</span></div>
           </div>
         </div>
       </div>
@@ -494,23 +546,28 @@
       <div class="ph-header">
         <div class="ph-back">←</div>
         <div style="text-align:center"><div style="font-size:.82rem;font-weight:700">CommandCenter</div></div>
-        <div class="ph-lang">HE</div>
+        <div class="ph-lang" data-t="ph.lang.cc">HE</div>
       </div>
       <div class="ph-body" style="padding:8px">
-        <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.68rem;color:var(--muted);margin-bottom:6px">🔍 חיפוש לפי לוחית...</div>
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.68rem;color:var(--muted);margin-bottom:6px" data-t="ph.search">🔍 חיפוש לפי לוחית...</div>
         <div style="display:flex;gap:4px;margin-bottom:8px">
-          <div style="flex:1;background:#fff;border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:.58rem;color:var(--muted)">סוג רכב ▾</div>
-          <div style="flex:1;background:#fff;border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:.58rem;color:var(--muted)">סטטוס ▾</div>
-          <div style="background:#EEF2FF;border:1.5px solid var(--primary);border-radius:6px;padding:3px 6px;font-size:.58rem;color:var(--primary);font-weight:700">ייצוא ▾</div>
+          <div style="flex:1;background:#fff;border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:.58rem;color:var(--muted)" data-t="ph.filter.tipo">סוג רכב ▾</div>
+          <div style="flex:1;background:#fff;border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:.58rem;color:var(--muted)" data-t="ph.filter.status">סטטוס ▾</div>
+          <div style="background:#EEF2FF;border:1.5px solid var(--primary);border-radius:6px;padding:3px 6px;font-size:.58rem;color:var(--primary);font-weight:700" data-t="ph.export">ייצוא ▾</div>
         </div>
         <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)">
           <table class="ph-table">
-            <thead><tr><th>לוחית</th><th>סוג</th><th>ביקורים</th><th>סטטוס</th></tr></thead>
+            <thead><tr>
+              <th data-t="ph.th.plate">לוחית</th>
+              <th data-t="ph.th.tipo">סוג</th>
+              <th data-t="ph.th.visits">ביקורים</th>
+              <th data-t="ph.th.status">סטטוס</th>
+            </tr></thead>
             <tbody>
-              <tr><td style="font-family:monospace;font-weight:700">AAA111</td><td>🚗</td><td>7</td><td><span class="ph-status known">מוכר</span></td></tr>
-              <tr><td style="font-family:monospace;font-weight:700">ABC223</td><td>🚗</td><td>1</td><td><span class="ph-status new">חדש</span></td></tr>
-              <tr><td style="font-family:monospace;font-weight:700">XYZ789</td><td>🛵</td><td>4</td><td><span class="ph-status known">מוכר</span></td></tr>
-              <tr><td style="font-family:monospace;font-weight:700">DEF456</td><td>🚗</td><td>1</td><td><span class="ph-status new">חדש</span></td></tr>
+              <tr><td style="font-family:monospace;font-weight:700">AAA111</td><td>🚗</td><td>7</td><td><span class="ph-status known" data-t="ph.status.known">מוכר</span></td></tr>
+              <tr><td style="font-family:monospace;font-weight:700">ABC223</td><td>🚗</td><td>1</td><td><span class="ph-status new" data-t="ph.status.new">חדש</span></td></tr>
+              <tr><td style="font-family:monospace;font-weight:700">XYZ789</td><td>🛵</td><td>4</td><td><span class="ph-status known" data-t="ph.status.known">מוכר</span></td></tr>
+              <tr><td style="font-family:monospace;font-weight:700">DEF456</td><td>🚗</td><td>1</td><td><span class="ph-status new" data-t="ph.status.new">חדש</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -545,21 +602,26 @@
 <script>
   const T = {
     he: {
+      /* NAV */
       'nav.s0':'🏠 דף הבית','nav.s1':'🔐 כניסה','nav.s2':'🟢 רכב חדש','nav.s3':'🔵 רכב מוכר',
       'nav.s4':'📋 היסטוריה','nav.s5':'📝 רשימת סשן','nav.s6':'📊 דשבורד','nav.s7':'🚗 ניהול רכבים',
+      /* HERO */
       'hero.title':'מדריך שימוש — ParkLog',
       'hero.sub':'סקירה מלאה של כל מסכי המערכת, פופ-אפים וזרימת השימוש',
+      /* S0 */
       's0.h2':'דף הבית','s0.sub':'נקודת הכניסה למערכת — בחירת יישום',
       's0.h3':'בחירת יישום','s0.p':'מסך זה מאפשר לנווט בין שני חלקי המערכת. בחר שפה בכפתור הדגלים בחלק העליון.',
       's0.c1':'<strong>ListaCarro</strong> — לעובדים בשטח: הזנת לוחיות, בדיקת רכב חדש/מוכר',
       's0.c2':'<strong>CommandCenter</strong> — למנהל: דשבורד, נתונים, ייצוא, היסטוריה',
       's0.c3':'<strong>מתג שפה</strong> — ES ספרדית / HE עברית — נשמר בין ביקורים',
+      /* S1 */
       's1.h2':'כניסה למערכת','s1.sub':'מסך התחברות — ListaCarro ו-CommandCenter',
       's1.h3':'כניסה לפני שימוש','s1.p':'כל יישום דורש כניסה עם שם משתמש וסיסמה. השם נשמר ומשויך לרישומים.',
       's1.c1':'<strong>שם משתמש</strong> — יופיע בכותרת לאורך כל השימוש וישמר ברישומים',
       's1.c2':'<strong>סיסמה</strong> — מוגדרת מראש, שונה בין ListaCarro ל-CommandCenter',
       's1.c3':'<strong>התנתקות</strong> — לחיצה על שם המשתמש בכותרת מתנתקת ומחזירה למסך כניסה',
       's1.tip':'<strong>טיפ:</strong> הדפדפן זוכר את שם המשתמש — בכניסה הבאה לא צריך להקליד מחדש.',
+      /* S2 */
       's2.h2':'הזנת רכב — רכב חדש','s2.sub':'ListaCarro — רכב שמעולם לא נראה במערכת',
       's2.h3':'רכב חדש — תג ירוק','s2.p':'כאשר מזינים לוחית שלא קיימת במערכת, מוצג תג ירוק מיידית. הרכב נרשם אוטומטית.',
       's2.c1':'<strong>שדה לוחית</strong> — הקלד/הדבק את מספר הרכב, הבדיקה מתבצעת אוטומטית',
@@ -567,12 +629,14 @@
       's2.c3':'<strong>סוג רכב</strong> — בחר מכונית או אופנוע',
       's2.c4':'<strong>הערות</strong> — שדה חופשי: מיקום, תיאור, מידע נוסף (עד 300 תווים)',
       's2.c5':'<strong>שמור כניסה</strong> — שולח ושומר ב-Google Sheets בשנייה',
+      /* S3 */
       's3.h2':'הזנת רכב — רכב מוכר','s3.sub':'ListaCarro — רכב שכבר קיים במערכת',
       's3.h3':'רכב מוכר — תג כחול','s3.p':'לוחית שכבר רשומה מקבלת תג כחול עם מידע על הביקור האחרון וסך הביקורים.',
       's3.c1':'<strong>תג כחול</strong> — הרכב מוכר, כולל תאריך ביקור אחרון ומספר ביקורים כולל',
       's3.c2':'<strong>לחיצה על התג</strong> — פותח פופ-אפ עם היסטוריית כל הביקורים (ראה מסך הבא)',
       's3.c3':'<strong>שם המשתמש בכותרת</strong> — לחיצה על השם מאפשרת התנתקות',
       's3.tip':'<strong>חשוב:</strong> ניתן לשמור כניסה גם לרכב מוכר — כל כניסה נרשמת בנפרד עם תאריך, שעה והערה.',
+      /* S4 */
       's4.h2':'היסטוריית ביקורים','s4.sub':'פופ-אפ עם כל הכניסות הקודמות של הרכב',
       's4.h3':'פופ-אפ היסטוריה','s4.p':'לחיצה על התג הכחול של רכב מוכר פותחת את הפופ-אפ הזה עם רשימת כל הכניסות הקודמות.',
       's4.c1':'<strong>לוחית הרכב</strong> — מוצגת בכחול בראש הפופ-אפ',
@@ -580,6 +644,7 @@
       's4.c3':'<strong>הערה</strong> — מוצגת בשורה שנייה (אם הוזנה) — טקסט מלא ללא קיצור',
       's4.c4':'<strong>העתק טבלה</strong> — מעתיק את כל ההיסטוריה ללוח, מוכנה להדבקה ב-WhatsApp / Excel',
       's4.c5':'<strong>סגירה אוטומטית</strong> — הפופ-אפ נסגר אוטומטית אחרי 10 שניות ממועד הצגת הנתונים',
+      /* S5 */
       's5.h2':'רשימת כניסות — סשן','s5.sub':'ListaCarro — רכבים שנרשמו בסשן הנוכחי',
       's5.h3':'מעקב סשן בזמן אמת','s5.p':'בתחתית המסך מופיעה רשימה חיה של כל הרכבים שנרשמו מאז פתיחת האפליקציה היום.',
       's5.c1':'<strong>מונה כניסות</strong> — מספר הרשומות בסשן הנוכחי',
@@ -587,6 +652,7 @@
       's5.c3':'<strong>שעת כניסה</strong> — שעה מדויקת לכל רשומה',
       's5.c4':'<strong>העתק רשימה</strong> — מעתיק את כל הלוחיות ללוח, שורה אחת לכל רכב',
       's5.tip':'<strong>חידוש אוטומטי:</strong> הרשימה מתאפסת כל יום בחצות ומתחילה מחדש.',
+      /* S6 */
       's6.h2':'CommandCenter — דשבורד','s6.sub':'תצוגת ניהול עם KPIs, גרפים וסטטיסטיקות',
       's6.h3':'דשבורד ניהולי','s6.p':'מסך זה מציג מבט-על על כל פעילות החניון בזמן אמת.',
       's6.c1':'<strong>כניסות היום</strong> — סך כל הרשומות מהיום. לחיצה מציגה רשימה עם תגי ×N לרכבים שנכנסו מספר פעמים',
@@ -594,6 +660,7 @@
       's6.c3':'<strong>גרף שבועי</strong> — עומס כניסות ב-9 השבועות האחרונים',
       's6.c4':'<strong>גרף עוגה</strong> — יחס חדשים מול מוכרים עם מספרים על התוויות',
       's6.c5':'<strong>רענון</strong> — כפתור רענון בפינה מעדכן את כל הנתונים',
+      /* S7 */
       's7.h2':'CommandCenter — ניהול רכבים','s7.sub':'טבלת כל הרכבים, סינון, עריכה וייצוא',
       's7.h3':'טבלת רכבים מלאה','s7.p':'כל הרכבים הרשומים עם אפשרויות סינון, עריכה וייצוא.',
       's7.c1':'<strong>חיפוש חי</strong> — הקלד לוחית וסינון מיידי בטבלה',
@@ -603,24 +670,85 @@
       's7.c5':'<strong>היסטוריה</strong> — לחיצה על היסטוריה בשורה מציגה את כל הכניסות של הרכב הספציפי',
       's7.c6':'<strong>עמודות נסתרות</strong> — ניתן להציג/הסתיר עמודות לפי הצורך',
       's7.tip':'<strong>ייצוא מהיר:</strong> לחץ על "ייצוא" ← "CSV" לקבלת קובץ Excel-מוכן עם כל הנתונים המסוננים.',
-      'footer.tag':'מערכת ניהול כניסות רכבים לחניון'
+      /* FOOTER */
+      'footer.tag':'מערכת ניהול כניסות רכבים לחניון',
+      /* PHONE MOCKUPS */
+      'ph.s0.sub':'מערכת ניהול כניסות רכבים',
+      'ph.s0.ve':'בדיקת רכבים — הזנת כניסות',
+      'ph.s0.cc':'דשבורד ניהולי — נתונים ודוחות',
+      'ph.s1.title':'כניסה — ListaCarro',
+      'ph.s1.user':'שם משתמש',
+      'ph.s1.btn':'כניסה',
+      'ph.s1.back':'← חזרה לדף הבית',
+      'ph.ve.title':'בדיקת רכבים',
+      'ph.ve.subtitle':'ListaCarro',
+      'ph.user':'👤 מוריה ✕',
+      'ph.lang':'HE',
+      'ph.lang.cc':'HE',
+      'ph.label.plate':'מספר לוחית',
+      'ph.badge.new.title':'רכב חדש',
+      'ph.badge.new.sub':'רכב זה לא היה כאן בעבר',
+      'ph.label.tipo':'סוג רכב',
+      'ph.tipo.auto':'🚗 מכונית',
+      'ph.tipo.moto':'🛵 אופנוע',
+      'ph.label.notes':'הערות (אופציונלי)',
+      'ph.notes.ph':'סוטנו 2, כניסה ראשית...',
+      'ph.notes.ph2':'הערות אופציונליות...',
+      'ph.btn.save':'💾 שמור כניסה',
+      'ph.badge.known.title':'רכב מוכר',
+      'ph.badge.known.sub':'ביקור אחרון: 09/03/2026 — 7 ביקורים בסה״כ',
+      'ph.badge.known.hint':'🔍 לחץ לצפייה בהיסטוריית ביקורים',
+      'ph.history.title':'היסטוריית ביקורים',
+      'ph.history.note1':'סוטנו 2 כניסה ראשית',
+      'ph.history.note2':'כניסה דרומית',
+      'ph.copy.table':'העתק טבלה',
+      'ph.close':'סגור',
+      'ph.session.title':'כניסות בסשן זה',
+      'ph.badge.known.sm':'מוכר',
+      'ph.badge.new.sm':'חדש',
+      'ph.copy.list':'📋 העתק רשימה',
+      'ph.cc.subtitle':'קומנדסנטר',
+      'ph.manager':'👤 מנהל ✕',
+      'ph.kpi.today':'כניסות היום',
+      'ph.kpi.new':'חדשים מהיום',
+      'ph.kpi.total':'סה״כ רכבים',
+      'ph.kpi.week':'כניסות השבוע',
+      'ph.chart.weekly':'כניסות לפי שבוע',
+      'ph.chart.donut':'חדשים מול מוכרים',
+      'ph.legend.new':'חדשים — 4',
+      'ph.legend.known':'מוכרים — 8',
+      'ph.search':'🔍 חיפוש לפי לוחית...',
+      'ph.filter.tipo':'סוג רכב ▾',
+      'ph.filter.status':'סטטוס ▾',
+      'ph.export':'ייצוא ▾',
+      'ph.th.plate':'לוחית',
+      'ph.th.tipo':'סוג',
+      'ph.th.visits':'ביקורים',
+      'ph.th.status':'סטטוס',
+      'ph.status.known':'מוכר',
+      'ph.status.new':'חדש'
     },
     es: {
+      /* NAV */
       'nav.s0':'🏠 Inicio','nav.s1':'🔐 Login','nav.s2':'🟢 Nuevo vehículo','nav.s3':'🔵 Vehículo conocido',
       'nav.s4':'📋 Historial','nav.s5':'📝 Lista sesión','nav.s6':'📊 Dashboard','nav.s7':'🚗 Gestión vehículos',
+      /* HERO */
       'hero.title':'Guía de uso — ParkLog',
       'hero.sub':'Vista completa de todas las pantallas, pop-ups y flujo de uso del sistema',
+      /* S0 */
       's0.h2':'Inicio','s0.sub':'Punto de entrada al sistema — selección de aplicación',
       's0.h3':'Seleccionar aplicación','s0.p':'Esta pantalla permite navegar entre las dos partes del sistema. Elige idioma con el botón de banderas.',
       's0.c1':'<strong>ListaCarro</strong> — Para trabajadores: registro de placas, verificación de vehículo nuevo/conocido',
       's0.c2':'<strong>CommandCenter</strong> — Para el administrador: dashboard, datos, exportación, historial',
       's0.c3':'<strong>Selector de idioma</strong> — ES español / HE hebreo — se guarda entre visitas',
+      /* S1 */
       's1.h2':'Inicio de sesión','s1.sub':'Pantalla de acceso — ListaCarro y CommandCenter',
       's1.h3':'Login antes de usar','s1.p':'Cada aplicación requiere nombre de usuario y contraseña. El nombre queda guardado y vinculado a los registros.',
       's1.c1':'<strong>Nombre de usuario</strong> — Aparece en el encabezado y queda guardado en los registros',
       's1.c2':'<strong>Contraseña</strong> — Predefinida, diferente entre ListaCarro y CommandCenter',
       's1.c3':'<strong>Cerrar sesión</strong> — Toca el nombre de usuario en el encabezado para desconectarte',
       's1.tip':'<strong>Consejo:</strong> El navegador recuerda el nombre de usuario — no hace falta volver a escribirlo.',
+      /* S2 */
       's2.h2':'Registro — Vehículo nuevo','s2.sub':'ListaCarro — vehículo nunca visto en el sistema',
       's2.h3':'Vehículo nuevo — badge verde','s2.p':'Al ingresar una placa que no existe en el sistema, aparece inmediatamente un badge verde. El vehículo se registra automáticamente.',
       's2.c1':'<strong>Campo de placa</strong> — Escribe o pega el número del vehículo, la verificación es automática',
@@ -628,12 +756,14 @@
       's2.c3':'<strong>Tipo de vehículo</strong> — Elige auto o moto',
       's2.c4':'<strong>Notas</strong> — Campo libre: ubicación, descripción, info adicional (máx. 300 caracteres)',
       's2.c5':'<strong>Guardar entrada</strong> — Envía y guarda en Google Sheets al instante',
+      /* S3 */
       's3.h2':'Registro — Vehículo conocido','s3.sub':'ListaCarro — vehículo ya registrado en el sistema',
       's3.h3':'Vehículo conocido — badge azul','s3.p':'Una placa ya registrada recibe un badge azul con info de la última visita y total de visitas.',
       's3.c1':'<strong>Badge azul</strong> — Vehículo conocido, incluye fecha de última visita y total de visitas',
       's3.c2':'<strong>Toca el badge</strong> — Abre un pop-up con el historial completo de visitas (ver siguiente pantalla)',
       's3.c3':'<strong>Nombre en encabezado</strong> — Tócalo para cerrar sesión',
       's3.tip':'<strong>Importante:</strong> Puedes guardar una entrada para un vehículo conocido — cada entrada se registra por separado con fecha, hora y nota.',
+      /* S4 */
       's4.h2':'Historial de visitas','s4.sub':'Pop-up con todas las entradas anteriores del vehículo',
       's4.h3':'Pop-up de historial','s4.p':'Al tocar el badge azul de un vehículo conocido se abre este pop-up con todas las entradas anteriores.',
       's4.c1':'<strong>Placa del vehículo</strong> — Se muestra en azul en la parte superior del pop-up',
@@ -641,6 +771,7 @@
       's4.c3':'<strong>Nota</strong> — Se muestra en segunda línea (si fue ingresada) — texto completo sin cortar',
       's4.c4':'<strong>Copiar tabla</strong> — Copia todo el historial al portapapeles, listo para pegar en WhatsApp / Excel',
       's4.c5':'<strong>Cierre automático</strong> — El pop-up se cierra automáticamente 10 segundos después de mostrar los datos',
+      /* S5 */
       's5.h2':'Lista de entradas — Sesión','s5.sub':'ListaCarro — vehículos registrados en la sesión actual',
       's5.h3':'Seguimiento de sesión en tiempo real','s5.p':'En la parte inferior aparece una lista en vivo de todos los vehículos registrados desde que se abrió la app hoy.',
       's5.c1':'<strong>Contador de entradas</strong> — Número de registros en la sesión actual',
@@ -648,6 +779,7 @@
       's5.c3':'<strong>Hora de entrada</strong> — Hora exacta para cada registro',
       's5.c4':'<strong>Copiar lista</strong> — Copia todas las placas al portapapeles, una por línea',
       's5.tip':'<strong>Reset automático:</strong> La lista se reinicia cada medianoche y vuelve a empezar.',
+      /* S6 */
       's6.h2':'CommandCenter — Dashboard','s6.sub':'Vista de gestión con KPIs, gráficos y estadísticas',
       's6.h3':'Dashboard administrativo','s6.p':'Esta pantalla muestra una visión general de toda la actividad del estacionamiento en tiempo real.',
       's6.c1':'<strong>Entradas hoy</strong> — Total de registros del día. Toca para ver lista con badges ×N para vehículos que entraron varias veces',
@@ -655,6 +787,7 @@
       's6.c3':'<strong>Gráfico semanal</strong> — Carga de entradas en las últimas 9 semanas',
       's6.c4':'<strong>Gráfico de torta</strong> — Proporción nuevos vs conocidos con números en las etiquetas',
       's6.c5':'<strong>Actualizar</strong> — Botón en la esquina actualiza todos los datos',
+      /* S7 */
       's7.h2':'CommandCenter — Gestión de vehículos','s7.sub':'Tabla completa de vehículos, filtros, edición y exportación',
       's7.h3':'Tabla completa de vehículos','s7.p':'Todos los vehículos registrados con opciones de filtrado, edición y exportación.',
       's7.c1':'<strong>Búsqueda en vivo</strong> — Escribe una placa para filtrar la tabla al instante',
@@ -664,7 +797,63 @@
       's7.c5':'<strong>Historial</strong> — Toca historial en una fila para ver todas las entradas de ese vehículo',
       's7.c6':'<strong>Columnas ocultas</strong> — Muestra/oculta columnas según necesidad',
       's7.tip':'<strong>Exportación rápida:</strong> Toca "Exportar" → "CSV" para obtener un archivo listo para Excel con todos los datos filtrados.',
-      'footer.tag':'Sistema de gestión de entradas de vehículos'
+      /* FOOTER */
+      'footer.tag':'Sistema de gestión de entradas de vehículos',
+      /* PHONE MOCKUPS */
+      'ph.s0.sub':'Sistema de gestión de vehículos',
+      'ph.s0.ve':'Verificación de vehículos — Registro',
+      'ph.s0.cc':'Dashboard de gestión — datos e informes',
+      'ph.s1.title':'Acceso — ListaCarro',
+      'ph.s1.user':'Nombre de usuario',
+      'ph.s1.btn':'Entrar',
+      'ph.s1.back':'← Volver al inicio',
+      'ph.ve.title':'ListaCarro',
+      'ph.ve.subtitle':'בדיקת רכבים',
+      'ph.user':'👤 María ✕',
+      'ph.lang':'ES',
+      'ph.lang.cc':'ES',
+      'ph.label.plate':'Número de placa',
+      'ph.badge.new.title':'Vehículo nuevo',
+      'ph.badge.new.sub':'Este vehículo no estuvo aquí antes',
+      'ph.label.tipo':'Tipo de vehículo',
+      'ph.tipo.auto':'🚗 Automóvil',
+      'ph.tipo.moto':'🛵 Motocicleta',
+      'ph.label.notes':'Notas (opcional)',
+      'ph.notes.ph':'Sótano 2, entrada principal...',
+      'ph.notes.ph2':'Notas opcionales...',
+      'ph.btn.save':'💾 Guardar entrada',
+      'ph.badge.known.title':'Vehículo conocido',
+      'ph.badge.known.sub':'Última visita: 09/03/2026 — 7 visitas en total',
+      'ph.badge.known.hint':'🔍 Toca para ver historial de visitas',
+      'ph.history.title':'Historial de visitas',
+      'ph.history.note1':'Sótano 2, entrada principal',
+      'ph.history.note2':'Entrada sur',
+      'ph.copy.table':'Copiar tabla',
+      'ph.close':'Cerrar',
+      'ph.session.title':'Entradas en esta sesión',
+      'ph.badge.known.sm':'Conocido',
+      'ph.badge.new.sm':'Nuevo',
+      'ph.copy.list':'📋 Copiar lista',
+      'ph.cc.subtitle':'Panel de gestión',
+      'ph.manager':'👤 Admin ✕',
+      'ph.kpi.today':'Entradas hoy',
+      'ph.kpi.new':'Nuevos hoy',
+      'ph.kpi.total':'Total vehículos',
+      'ph.kpi.week':'Entradas semana',
+      'ph.chart.weekly':'Entradas por semana',
+      'ph.chart.donut':'Nuevos vs conocidos',
+      'ph.legend.new':'Nuevos — 4',
+      'ph.legend.known':'Conocidos — 8',
+      'ph.search':'🔍 Buscar por placa...',
+      'ph.filter.tipo':'Tipo ▾',
+      'ph.filter.status':'Estado ▾',
+      'ph.export':'Exportar ▾',
+      'ph.th.plate':'Placa',
+      'ph.th.tipo':'Tipo',
+      'ph.th.visits':'Visitas',
+      'ph.th.status':'Estado',
+      'ph.status.known':'Conocido',
+      'ph.status.new':'Nuevo'
     }
   };
 
