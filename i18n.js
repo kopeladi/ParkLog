@@ -45,13 +45,16 @@ const TRANSLATIONS = {
     'badge.known': 'Vehículo conocido',
     'badge.known.lastSeen': 'Última visita',
     'badge.known.totalVisits': 'visitas en total',
+    'badge.known.clickHistory': '🔍 Toca para ver historial de visitas',
 
     /* ── Session List ── */
-    'session.title': 'Vehículos nuevos esta sesión',
-    'session.empty': 'Aún no hay vehículos nuevos en esta sesión',
-    'session.copy': 'Copiar todas las placas',
+    'session.title': 'Vehículos en esta sesión',
+    'session.empty': 'Aún no hay vehículos en esta sesión',
+    'session.copy': 'Copiar nuevos',
     'session.copied': '¡Copiado!',
-    'session.count': 'nuevos',
+    'session.count': 'vehículos',
+    'session.badge.new': 'NUEVO',
+    'session.badge.known': 'CONOCIDO',
 
     /* ── Success / Error Messages ── */
     'msg.saved.new': '¡Guardado! Vehículo nuevo registrado',
@@ -142,12 +145,14 @@ const TRANSLATIONS = {
     /* History */
     'history.title': 'Historial de visitas',
     'history.close': 'Cerrar',
+    'history.copy': 'Copiar tabla',
 
     /* Login */
     'login.title': 'Acceso',
     'login.username': 'Nombre de usuario',
     'login.password': 'Contraseña',
     'login.submit': 'Entrar',
+    'login.back': '← Volver al inicio',
 
     /* Loading & Empty */
     'loading': 'Cargando...',
@@ -190,13 +195,16 @@ const TRANSLATIONS = {
     'badge.known': 'רכב מוכר',
     'badge.known.lastSeen': 'ביקור אחרון',
     'badge.known.totalVisits': 'ביקורים בסה"כ',
+    'badge.known.clickHistory': '🔍 לחץ לצפייה בהיסטוריית ביקורים',
 
     /* ── Session List ── */
-    'session.title': 'רכבים חדשים בסשן זה',
-    'session.empty': 'עדיין אין רכבים חדשים בסשן זה',
-    'session.copy': 'העתק את כל הלוחיות',
+    'session.title': 'רכבים בסשן זה',
+    'session.empty': 'עדיין אין רכבים בסשן זה',
+    'session.copy': 'העתק חדשים',
     'session.copied': 'הועתק!',
-    'session.count': 'חדשים',
+    'session.count': 'רכבים',
+    'session.badge.new': 'חדש',
+    'session.badge.known': 'מוכר',
 
     /* ── Success / Error Messages ── */
     'msg.saved.new': 'נשמר! רכב חדש נרשם',
@@ -287,12 +295,14 @@ const TRANSLATIONS = {
     /* History */
     'history.title': 'היסטוריית ביקורים',
     'history.close': 'סגור',
+    'history.copy': 'העתק טבלה',
 
     /* Login */
     'login.title': 'כניסה',
     'login.username': 'שם משתמש',
     'login.password': 'סיסמה',
     'login.submit': 'כניסה',
+    'login.back': '→ חזרה לדף הבית',
 
     /* Loading & Empty */
     'loading': 'טוען...',

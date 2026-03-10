@@ -19,7 +19,8 @@ const DataStore = (() => {
   let rateLimitPending = false;
 
   /* ── Fetch Timeout ── */
-  const FETCH_TIMEOUT_MS = 10000;
+  /* Apps Script can take 15-20s on cold start — keep timeout generous */
+  const FETCH_TIMEOUT_MS = 25000;
 
   /* ── Offline Queue ── */
   const QUEUE_KEY = 'parklog-offline-queue';
@@ -32,7 +33,7 @@ const DataStore = (() => {
    * @returns {Promise<Object>} Response data
    * @throws {Error} On network or server error
    */
-  async function apiGet(action, params = {}) {
+  async function apiGet(action, params = {}, attempt = 1) {
     await rateLimit();
 
     const url = new URL(CONFIG.APPS_SCRIPT_URL);
@@ -54,6 +55,12 @@ const DataStore = (() => {
         signal: controller.signal
       });
     } catch (err) {
+      clearTimeout(timeoutId);
+      /* Auto-retry once on timeout — Apps Script cold start can take 15-20s */
+      if (err.name === 'AbortError' && attempt === 1) {
+        await new Promise(r => setTimeout(r, 2000));
+        return apiGet(action, params, 2);
+      }
       if (err.name === 'AbortError') throw new Error('Request timed out');
       throw err;
     } finally {
@@ -268,7 +275,8 @@ const DataStore = (() => {
         placa: (data.placa || '').toUpperCase().trim(),
         tipo: data.tipo || CONFIG.DEFAULT_VEHICLE_TYPE,
         notes: (data.notes || '').trim(),
-        createdBy: data.createdBy || 'anonymous'
+        createdBy: data.createdBy || 'anonymous',
+        entryDate: data.entryDate || null  // client-side local date (YYYY-MM-DD)
       };
 
       try {

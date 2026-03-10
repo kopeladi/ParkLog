@@ -75,6 +75,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginPasswordInput = document.getElementById('login-password');
   const loginError = document.getElementById('login-error');
 
+  /* ── State ── */
+  let allVehicles = [];
+  let filteredVehicles = [];
+  let sortConfig = { column: 'lastSeen', direction: 'desc' };
+  let activeExportType = null;
+  let editingVehicle = null; // { vehicleId, placa }
+  let lastFocusedElement = null; // for returning focus after modal close
+  let weeklyChart = null;
+  let ratioChart = null;
+  let searchTimer = null;
+
+  /* ── Column Definition ── */
+  const COLUMNS = [
+    { id: 'num',         i18nKey: 'table.num',         sortable: false,  toggleable: false, defaultVisible: true },
+    { id: 'tipo',        i18nKey: 'table.tipo',        sortable: true,   toggleable: true,  defaultVisible: true },
+    { id: 'placa',       i18nKey: 'table.placa',       sortable: true,   toggleable: false, defaultVisible: true },
+    { id: 'firstSeen',   i18nKey: 'table.firstSeen',   sortable: true,   toggleable: true,  defaultVisible: true },
+    { id: 'lastSeen',    i18nKey: 'table.lastSeen',    sortable: true,   toggleable: true,  defaultVisible: true },
+    { id: 'totalVisits', i18nKey: 'table.totalVisits', sortable: true,   toggleable: true,  defaultVisible: true },
+    { id: 'status',      i18nKey: 'table.status',      sortable: true,   toggleable: true,  defaultVisible: true },
+    { id: 'createdBy',   i18nKey: 'table.createdBy',   sortable: true,   toggleable: true,  defaultVisible: true },
+    { id: 'notes',       i18nKey: 'table.notes',       sortable: false,  toggleable: true,  defaultVisible: true },
+    { id: 'actions',     i18nKey: 'table.actions',     sortable: false,  toggleable: false, defaultVisible: true }
+  ];
+
+  let visibleColumns = new Set(COLUMNS.filter(c => c.defaultVisible).map(c => c.id));
+
   const STORAGE_CC_USER_KEY = 'parklog-cc-username';
   let currentCCUser = localStorage.getItem(STORAGE_CC_USER_KEY) || '';
 
@@ -108,33 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loginOverlay.classList.add('hidden');
     init();
   }
-
-  /* ── State ── */
-  let allVehicles = [];
-  let filteredVehicles = [];
-  let sortConfig = { column: 'lastSeen', direction: 'desc' };
-  let activeExportType = null;
-  let editingVehicle = null; // { vehicleId, placa }
-  let lastFocusedElement = null; // for returning focus after modal close
-  let weeklyChart = null;
-  let ratioChart = null;
-  let searchTimer = null;
-
-  /* ── Column Definition ── */
-  const COLUMNS = [
-    { id: 'num',         i18nKey: 'table.num',         sortable: false,  toggleable: false, defaultVisible: true },
-    { id: 'tipo',        i18nKey: 'table.tipo',        sortable: true,   toggleable: true,  defaultVisible: true },
-    { id: 'placa',       i18nKey: 'table.placa',       sortable: true,   toggleable: false, defaultVisible: true },
-    { id: 'firstSeen',   i18nKey: 'table.firstSeen',   sortable: true,   toggleable: true,  defaultVisible: true },
-    { id: 'lastSeen',    i18nKey: 'table.lastSeen',    sortable: true,   toggleable: true,  defaultVisible: true },
-    { id: 'totalVisits', i18nKey: 'table.totalVisits', sortable: true,   toggleable: true,  defaultVisible: true },
-    { id: 'status',      i18nKey: 'table.status',      sortable: true,   toggleable: true,  defaultVisible: true },
-    { id: 'createdBy',   i18nKey: 'table.createdBy',   sortable: true,   toggleable: true,  defaultVisible: true },
-    { id: 'notes',       i18nKey: 'table.notes',       sortable: false,  toggleable: true,  defaultVisible: true },
-    { id: 'actions',     i18nKey: 'table.actions',     sortable: false,  toggleable: false, defaultVisible: true }
-  ];
-
-  let visibleColumns = new Set(COLUMNS.filter(c => c.defaultVisible).map(c => c.id));
 
   /* ══════════════════════════════════════════
      Initialization
@@ -278,16 +278,29 @@ document.addEventListener('DOMContentLoaded', () => {
         allVehicles = mock.vehicles;
         applyFilters();
       } else {
-        /* Production: parallel load */
-        const [dashboard, vehicleData] = await Promise.all([
-          DataStore.getDashboardData(),
-          DataStore.getVehicles()
-        ]);
+        /* Production: load KPIs first so numbers appear quickly, then vehicles */
+        let dashboard, vehicleData;
 
-        renderKPIs(dashboard.kpis);
-        initCharts(dashboard);
-        allVehicles = vehicleData.vehicles || [];
-        applyFilters();
+        try {
+          dashboard = await DataStore.getDashboardData();
+          renderKPIs(dashboard.kpis);
+          initCharts(dashboard);
+        } catch (dashErr) {
+          renderKPIsError();
+          showToast(navigator.onLine ? t('msg.error.server') : t('msg.error.network'), 'error');
+        }
+
+        try {
+          vehicleData = await DataStore.getVehicles();
+          allVehicles = vehicleData.vehicles || [];
+          applyFilters();
+        } catch (vehicleErr) {
+          allVehicles = [];
+          applyFilters();
+          if (!dashboard) { /* only show second toast if KPIs also failed */
+            showToast(navigator.onLine ? t('msg.error.server') : t('msg.error.network'), 'error');
+          }
+        }
       }
 
       lastUpdatedEl.textContent = new Date().toLocaleTimeString('es', {
@@ -311,10 +324,17 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {{ entriesToday: number, newToday: number, totalVehicles: number, weeklyEntries: number }} kpis
    */
   function renderKPIs(kpis) {
-    kpiEntriesToday.textContent = kpis.entriesToday;
-    kpiNewToday.textContent = kpis.newToday;
-    kpiTotalVehicles.textContent = kpis.totalVehicles;
-    kpiWeeklyEntries.textContent = kpis.weeklyEntries;
+    kpiEntriesToday.textContent = kpis.entriesToday ?? '--';
+    kpiNewToday.textContent = kpis.newToday ?? '--';
+    kpiTotalVehicles.textContent = kpis.totalVehicles ?? '--';
+    kpiWeeklyEntries.textContent = kpis.weeklyEntries ?? '--';
+  }
+
+  function renderKPIsError() {
+    kpiEntriesToday.textContent = '--';
+    kpiNewToday.textContent = '--';
+    kpiTotalVehicles.textContent = '--';
+    kpiWeeklyEntries.textContent = '--';
   }
 
   /* ══════════════════════════════════════════
@@ -440,7 +460,18 @@ document.addEventListener('DOMContentLoaded', () => {
               font: { family: 'Inter', size: 13 },
               color: '#1E293B',
               usePointStyle: true,
-              pointStyleWidth: 12
+              pointStyleWidth: 12,
+              generateLabels(chart) {
+                const data = chart.data;
+                return data.labels.map((label, i) => ({
+                  text: `${label} — ${data.datasets[0].data[i]}`,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  strokeStyle: data.datasets[0].backgroundColor[i],
+                  pointStyle: 'circle',
+                  hidden: false,
+                  index: i
+                }));
+              }
             }
           },
           tooltip: {
@@ -874,7 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
       case 'byLastSeen':
-        return [...allVehicles].sort((a, b) => {
+        return [...filteredVehicles].sort((a, b) => {
           const dA = parseDate(a.last_seen) || new Date(0);
           const dB = parseDate(b.last_seen) || new Date(0);
           return dB - dA;
@@ -1194,63 +1225,110 @@ document.addEventListener('DOMContentLoaded', () => {
    * Opens the KPI list modal showing plates for a given type.
    * @param {'entries'|'new'} type - Which KPI list to show
    */
-  function openKpiListModal(type) {
+  async function openKpiListModal(type) {
     lastFocusedElement = document.activeElement; // save opener for focus return
     const todayStr = formatDateYMD(new Date());
-    let vehicles = [];
     let title = '';
     let emptyMsg = '';
 
-    if (type === 'entries') {
-      /* Vehicles seen today (last_seen === today) */
-      vehicles = allVehicles.filter(v => v.last_seen === todayStr);
-      title = t('kpi.entriesToday.title');
-      emptyMsg = t('kpi.emptyEntries');
-    } else {
-      /* New vehicles today (first_seen === today && total_visits <= 1) */
-      vehicles = allVehicles.filter(v => v.first_seen === todayStr && v.total_visits <= 1);
-      title = t('kpi.newToday.title');
-      emptyMsg = t('kpi.emptyNew');
-    }
-
-    kpiListModalTitle.textContent = title;
-    kpiListPlates = vehicles.map(v => v.placa);
-
-    /* Clear and populate list */
-    kpiListContent.innerHTML = '';
-
-    if (vehicles.length === 0) {
-      kpiListContent.classList.add('hidden');
-      kpiListEmpty.classList.remove('hidden');
-      kpiListEmpty.querySelector('span').textContent = emptyMsg;
-      kpiListCopy.classList.add('hidden');
-    } else {
-      kpiListContent.classList.remove('hidden');
-      kpiListEmpty.classList.add('hidden');
-      kpiListCopy.classList.remove('hidden');
-
-      vehicles.forEach(v => {
-        const item = document.createElement('div');
-        item.className = 'kpi-list-item';
-
-        const placa = document.createElement('span');
-        placa.className = 'kpi-list-placa';
-        placa.textContent = v.placa;
-
-        const tipo = document.createElement('span');
-        tipo.className = 'kpi-list-tipo';
-        tipo.textContent = v.tipo === 'moto' ? '🛵' : '🚗';
-
-        item.appendChild(placa);
-        item.appendChild(tipo);
-        kpiListContent.appendChild(item);
-      });
-    }
-
     kpiListModal.classList.add('active');
     kpiListModal.addEventListener('keydown', trapTabInModal);
-    /* Focus the close button after opening */
+    kpiListContent.innerHTML = `<p class="text-sm text-muted" style="padding:var(--space-md) 0">${t('loading')}</p>`;
+    kpiListContent.classList.remove('hidden');
+    kpiListEmpty.classList.add('hidden');
+    kpiListCopy.classList.add('hidden');
     kpiListModalClose.focus();
+
+    if (type === 'entries') {
+      title = t('kpi.entriesToday.title');
+      emptyMsg = t('kpi.emptyEntries');
+      kpiListModalTitle.textContent = title;
+
+      /* Fetch actual entries for today, group by placa to get per-vehicle counts */
+      let entryCounts = {}; // placa → count
+      try {
+        const result = await DataStore.getEntries({ dateFrom: todayStr, dateTo: todayStr });
+        const entries = result.entries || [];
+        entries.forEach(e => {
+          const p = e.placa || e.vehicle_placa || '';
+          if (p) entryCounts[p] = (entryCounts[p] || 0) + 1;
+        });
+      } catch (_) { /* fall back to allVehicles last_seen */ }
+
+      const vehicles = allVehicles.filter(v => v.last_seen === todayStr);
+      kpiListPlates = vehicles.map(v => v.placa);
+      kpiListContent.innerHTML = '';
+
+      if (vehicles.length === 0) {
+        kpiListContent.classList.add('hidden');
+        kpiListEmpty.classList.remove('hidden');
+        kpiListEmpty.querySelector('span').textContent = emptyMsg;
+      } else {
+        kpiListContent.classList.remove('hidden');
+        kpiListCopy.classList.remove('hidden');
+        vehicles.forEach(v => {
+          const item = document.createElement('div');
+          item.className = 'kpi-list-item';
+
+          const placa = document.createElement('span');
+          placa.className = 'kpi-list-placa';
+          placa.textContent = v.placa;
+
+          const tipo = document.createElement('span');
+          tipo.className = 'kpi-list-tipo';
+          tipo.textContent = v.tipo === 'moto' ? '🛵' : '🚗';
+
+          item.appendChild(placa);
+          item.appendChild(tipo);
+
+          const count = entryCounts[v.placa] || 0;
+          if (count > 1) {
+            const badge = document.createElement('span');
+            badge.className = 'kpi-list-badge';
+            badge.textContent = `×${count}`;
+            item.appendChild(badge);
+          }
+
+          kpiListContent.appendChild(item);
+        });
+      }
+
+    } else {
+      title = t('kpi.newToday.title');
+      emptyMsg = t('kpi.emptyNew');
+      kpiListModalTitle.textContent = title;
+
+      /* New vehicles: first_seen === today (no total_visits restriction) */
+      const vehicles = allVehicles.filter(v => v.first_seen === todayStr);
+      kpiListPlates = vehicles.map(v => v.placa);
+      kpiListContent.innerHTML = '';
+
+      if (vehicles.length === 0) {
+        kpiListContent.classList.add('hidden');
+        kpiListEmpty.classList.remove('hidden');
+        kpiListEmpty.querySelector('span').textContent = emptyMsg;
+      } else {
+        kpiListContent.classList.remove('hidden');
+        kpiListCopy.classList.remove('hidden');
+        vehicles.forEach(v => {
+          const item = document.createElement('div');
+          item.className = 'kpi-list-item';
+
+          const placa = document.createElement('span');
+          placa.className = 'kpi-list-placa';
+          placa.textContent = v.placa;
+
+          const tipo = document.createElement('span');
+          tipo.className = 'kpi-list-tipo';
+          tipo.textContent = v.tipo === 'moto' ? '🛵' : '🚗';
+
+          item.appendChild(placa);
+          item.appendChild(tipo);
+          kpiListContent.appendChild(item);
+        });
+      }
+    }
+
     lucide.createIcons();
   }
 
@@ -1340,11 +1418,11 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function displayDate(str) {
     if (!str) return '-';
-    if (str.includes('-')) {
-      const parts = str.split('-');
-      if (parts.length === 3 && parts[0].length === 4) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
+    /* Extract just the date part if a full ISO timestamp was returned */
+    const dateOnly = typeof str === 'string' ? str.substring(0, 10) : String(str);
+    if (dateOnly.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [y, m, d] = dateOnly.split('-');
+      return `${d}/${m}/${y}`;
     }
     return str;
   }

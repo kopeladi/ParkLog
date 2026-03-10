@@ -175,8 +175,16 @@ function createEntry(data) {
   } else {
     now = new Date();
   }
-  const dateStr = formatDate(now);
   const timeStr = formatTime(now);
+
+  /*
+   * Use client-provided entryDate if available — this eliminates Apps Script
+   * timezone dependency. The client already computed the correct local date.
+   * Fall back to server-side formatDate only if client date is absent.
+   */
+  const dateStr = (data.entryDate && /^\d{4}-\d{2}-\d{2}$/.test(data.entryDate))
+    ? data.entryDate
+    : formatDate(now);
 
   const vehiclesSheet = getSheet('Vehicles');
   const entriesSheet = getSheet('Entries');
@@ -201,28 +209,35 @@ function createEntry(data) {
   let totalVisits;
 
   if (isNew) {
-    /* Create new vehicle */
+    /* Create new vehicle — store dateStr for first_seen/last_seen so that
+     * getDashboardData can compare them as strings without timezone issues. */
     vehicleId = Utilities.getUuid();
     totalVisits = 1;
     vehiclesSheet.appendRow([
       vehicleId,
       placa,
       tipo,
-      now,        // first_seen
-      now,        // last_seen
+      dateStr,    // first_seen (stored as string YYYY-MM-DD)
+      dateStr,    // last_seen  (stored as string YYYY-MM-DD)
       1,          // total_visits
       notes,      // notes
       data.createdBy || 'anonymous', // created_by
       notes ? dateStr : '' // notes_updated
     ]);
+    /* Highlight new vehicle row in green */
+    var newRow = vehiclesSheet.getLastRow();
+    vehiclesSheet.getRange(newRow, 1, 1, 9).setBackground('#c6efce');
   } else {
     /* Update existing vehicle */
     vehicleId = existingVehicle.vehicle_id;
     totalVisits = (existingVehicle.total_visits || 0) + 1;
 
-    // Update last_seen (col 5), total_visits (col 6)
-    vehiclesSheet.getRange(existingRow, 5).setValue(now);
+    // Update last_seen (col 5), total_visits (col 6) — store as string for consistency
+    vehiclesSheet.getRange(existingRow, 5).setValue(dateStr);
     vehiclesSheet.getRange(existingRow, 6).setValue(totalVisits);
+
+    // Remove green highlight — vehicle is no longer new
+    vehiclesSheet.getRange(existingRow, 1, 1, 9).setBackground(null);
 
     // Update notes if provided
     if (notes) {
@@ -231,17 +246,30 @@ function createEntry(data) {
     }
   }
 
-  /* Create entry record */
+  /* Create entry record — store dateStr (string) not now (Date) for entry_date.
+   * This ensures getDashboardData string comparison works regardless of timezone. */
   const entryId = Utilities.getUuid();
-  entriesSheet.appendRow([
-    entryId,
-    vehicleId,
-    placa,
-    now,        // entry_date
-    timeStr,    // entry_time
-    notes,      // notes_entry
-    data.createdBy || 'anonymous' // created_by
-  ]);
+  if (entriesSheet.getLastRow() <= 1) {
+    entriesSheet.appendRow([
+      entryId, vehicleId, placa, dateStr, timeStr, notes, data.createdBy || 'anonymous'
+    ]);
+  } else {
+    entriesSheet.insertRowAfter(1);
+    entriesSheet.getRange(2, 1, 1, 7).setValues([[
+      entryId, vehicleId, placa, dateStr, timeStr, notes, data.createdBy || 'anonymous'
+    ]]);
+  }
+
+  /* Mirror to VisitLog sheet (newest-first, filterable by plate) */
+  var visitLogSheet = getSheet('VisitLog');
+  if (visitLogSheet.getLastRow() <= 1) {
+    visitLogSheet.appendRow([placa, tipo, dateStr, timeStr, data.createdBy || 'anonymous']);
+  } else {
+    visitLogSheet.insertRowAfter(1);
+    visitLogSheet.getRange(2, 1, 1, 5).setValues([[
+      placa, tipo, dateStr, timeStr, data.createdBy || 'anonymous'
+    ]]);
+  }
 
   return {
     success: true,
@@ -368,6 +396,7 @@ function getEntries(filters) {
 function getVehicleHistory(vehicleId) {
   if (!vehicleId) throw new Error('vehicleId is required');
 
+  const spreadsheetTZ = SpreadsheetApp.openById(SHEET_ID).getSpreadsheetTimeZone();
   const sheet = getSheet('Entries');
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
@@ -377,15 +406,18 @@ function getVehicleHistory(vehicleId) {
     const row = rowToObject(headers, data[i]);
     if (row.vehicle_id === vehicleId) {
       history.push({
-        date: formatDate(row.entry_date),
-        time: row.entry_time || '',
+        date: formatDateTZ(row.entry_date, spreadsheetTZ),
+        time: extractTimeStr(row.entry_time),
         notes: row.notes_entry || ''
       });
     }
   }
 
   /* Sort newest first */
-  history.sort((a, b) => b.date.localeCompare(a.date));
+  history.sort((a, b) => {
+    const d = b.date.localeCompare(a.date);
+    return d !== 0 ? d : b.time.localeCompare(a.time);
+  });
 
   return { history: history };
 }
@@ -406,18 +438,23 @@ function getDashboardData(params) {
   const today = (params && params.today) ? params.today : formatDate(new Date());
   const weekStart = (params && params.weekStart) ? params.weekStart : getWeekStart(new Date());
 
+  /* Get spreadsheet timezone once — used by formatDateTZ to recover stored dates correctly */
+  const spreadsheetTZ = SpreadsheetApp.openById(SHEET_ID).getSpreadsheetTimeZone();
+
   /* ── KPIs ── */
   let entriesToday = 0;
   let newToday = 0;
   let totalVehicles = vehiclesData.length > 1 ? vehiclesData.length - 1 : 0;
   let weeklyEntries = 0;
 
-  /* Count entries today and this week */
+  /* Count entries today and this week.
+   * formatDateTZ uses the spreadsheet timezone to recover dates stored as strings,
+   * which handles UTC+ timezones correctly (e.g. Israel UTC+3). */
   if (entriesData.length > 1) {
     const entriesHeaders = entriesData[0];
     for (let i = 1; i < entriesData.length; i++) {
       const row = rowToObject(entriesHeaders, entriesData[i]);
-      const entryDate = formatDate(row.entry_date);
+      const entryDate = formatDateTZ(row.entry_date, spreadsheetTZ);
 
       if (entryDate === today) entriesToday++;
       if (entryDate >= weekStart) weeklyEntries++;
@@ -429,12 +466,12 @@ function getDashboardData(params) {
     const vHeaders = vehiclesData[0];
     for (let i = 1; i < vehiclesData.length; i++) {
       const row = rowToObject(vHeaders, vehiclesData[i]);
-      if (formatDate(row.first_seen) === today) newToday++;
+      if (formatDateTZ(row.first_seen, spreadsheetTZ) === today) newToday++;
     }
   }
 
   /* ── Weekly Bar Chart Data (last 9 weeks) ── */
-  const weeklyData = getWeeklyChartData(entriesData);
+  const weeklyData = getWeeklyChartData(entriesData, spreadsheetTZ);
 
   /* ── New vs Known Doughnut ── */
   let newCount = 0;
@@ -443,7 +480,7 @@ function getDashboardData(params) {
     const vHeaders = vehiclesData[0];
     for (let i = 1; i < vehiclesData.length; i++) {
       const row = rowToObject(vHeaders, vehiclesData[i]);
-      if (formatDate(row.first_seen) === today) {
+      if (formatDateTZ(row.first_seen, spreadsheetTZ) === today) {
         newCount++;
       } else {
         knownCount++;
@@ -521,6 +558,8 @@ function getSheet(name) {
       sheet.appendRow(['vehicle_id', 'placa', 'tipo', 'first_seen', 'last_seen', 'total_visits', 'notes', 'created_by', 'notes_updated']);
     } else if (name === 'Entries') {
       sheet.appendRow(['entry_id', 'vehicle_id', 'placa', 'entry_date', 'entry_time', 'notes_entry', 'created_by']);
+    } else if (name === 'VisitLog') {
+      sheet.appendRow(['placa', 'tipo', 'visit_date', 'visit_time', 'created_by']);
     }
     /* Format header row */
     sheet.getRange(1, 1, 1, sheet.getLastColumn()).setFontWeight('bold');
@@ -545,7 +584,8 @@ function rowToObject(headers, row) {
 }
 
 /**
- * Formats a Date to YYYY-MM-DD string.
+ * Formats a Date to YYYY-MM-DD string using script timezone.
+ * Used for display and for writing new dates.
  *
  * @param {Date|string} date
  * @returns {string}
@@ -557,10 +597,30 @@ function formatDate(date) {
     date = new Date(date);
   }
   if (!(date instanceof Date) || isNaN(date.getTime())) return '';
-  // Use Utilities.formatDate so the result is always in the script's timezone,
-  // not UTC. Without this, date.getDate() returns the UTC day which can be
-  // one day behind for users in UTC+ timezones (e.g. Israel).
   return Utilities.formatDate(date, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+
+/**
+ * Formats a date value using the SPREADSHEET timezone.
+ *
+ * Why this matters: when "2026-03-09" (a string) is stored in Sheets,
+ * Sheets converts it to midnight in the SPREADSHEET timezone.
+ * Reading it back with UTC methods gives the wrong day for UTC+ timezones
+ * (e.g. Israel UTC+3: midnight Israel = 21:00 UTC prev day → UTC date = prev day).
+ * Formatting with the spreadsheet timezone recovers the original "2026-03-09".
+ *
+ * @param {Date|string} dateValue
+ * @param {string} spreadsheetTZ - result of SpreadsheetApp...getSpreadsheetTimeZone()
+ * @returns {string} YYYY-MM-DD
+ */
+function formatDateTZ(dateValue, spreadsheetTZ) {
+  if (!dateValue) return '';
+  if (typeof dateValue === 'string') {
+    if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) return dateValue;
+    dateValue = new Date(dateValue);
+  }
+  if (!(dateValue instanceof Date) || isNaN(dateValue.getTime())) return '';
+  return Utilities.formatDate(dateValue, spreadsheetTZ, 'yyyy-MM-dd');
 }
 
 /**
@@ -571,6 +631,23 @@ function formatDate(date) {
  */
 function formatTime(date) {
   return Utilities.formatDate(date, Session.getScriptTimeZone(), 'HH:mm');
+}
+
+/**
+ * Extracts a time string from a cell value.
+ * Google Sheets stores time-only values as Date objects based on the 1899/1900 epoch.
+ * This function converts them back to "HH:mm" regardless of input type.
+ *
+ * @param {Date|string|number} val - Raw cell value
+ * @returns {string} "HH:mm" or empty string
+ */
+function extractTimeStr(val) {
+  if (!val && val !== 0) return '';
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'HH:mm');
+  }
+  if (typeof val === 'string') return val;
+  return '';
 }
 
 /**
@@ -595,26 +672,25 @@ function getWeekStart(date) {
  * @param {any[][]} entriesData - Raw entries sheet data
  * @returns {Array<{ weekStart: string, count: number }>}
  */
-function getWeeklyChartData(entriesData) {
+function getWeeklyChartData(entriesData, spreadsheetTZ) {
   const weeks = {};
 
-  /* Generate last 9 week starts */
+  /* Generate last 9 week starts — use UTC noon to avoid day-boundary issues in UTC+ timezones */
   const now = new Date();
   for (let w = 8; w >= 0; w--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - (w * 7));
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (w * 7), 12, 0, 0));
     const ws = getWeekStart(d);
     weeks[ws] = 0;
   }
 
-  /* Count entries per week */
+  /* Count entries per week — use formatDateTZ to recover stored dates correctly */
   if (entriesData.length > 1) {
     const headers = entriesData[0];
     for (let i = 1; i < entriesData.length; i++) {
       const row = rowToObject(headers, entriesData[i]);
-      const entryDate = row.entry_date;
-      if (!entryDate) continue;
-      const ws = getWeekStart(new Date(entryDate));
+      const entryDateStr = formatDateTZ(row.entry_date, spreadsheetTZ);
+      if (!entryDateStr) continue;
+      const ws = getWeekStart(new Date(entryDateStr + 'T12:00:00Z')); // noon UTC avoids day boundary issues
       if (weeks.hasOwnProperty(ws)) {
         weeks[ws]++;
       }
@@ -707,5 +783,19 @@ function jsonResponse(data, statusCode) {
 function setupSheets() {
   getSheet('Vehicles');
   getSheet('Entries');
+  getSheet('VisitLog');
   Logger.log('Sheets created/verified successfully!');
+}
+
+/**
+ * Clears green highlight from all rows in Vehicles sheet.
+ * Run this daily via a time-based trigger (Triggers → Add Trigger → clearDailyColors → Day timer).
+ */
+function clearDailyColors() {
+  var sheet = getSheet('Vehicles');
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, 9).setBackground(null);
+  }
+  Logger.log('Daily colors cleared: ' + new Date().toISOString());
 }

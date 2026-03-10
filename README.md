@@ -11,8 +11,8 @@ Bilingual (Spanish/Hebrew) system for tracking vehicle entries in parking facili
 ## 🚀 Quick Start
 
 ### For End Users
-- **VaultEntry**: https://kopeladi.github.io/ParkLog/vault-entry.html
-- **CommandCenter**: https://kopeladi.github.io/ParkLog/commandcenter.html
+- **VaultEntry**: https://parklog.vercel.app/vault-entry.html
+- **CommandCenter**: https://parklog.vercel.app/commandcenter.html
 
 ### For Developers/Clients
 

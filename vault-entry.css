@@ -129,6 +129,163 @@
   text-align: center;
 }
 
+/* ── Session List Items with badges ── */
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.session-item:last-child {
+  border-bottom: none;
+}
+
+.session-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.session-badge-new {
+  background: var(--color-success-light);
+  color: #065F46;
+}
+
+.session-badge-known {
+  background: var(--color-info-light);
+  color: #1E40AF;
+}
+
+.session-item .plate {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  flex: 1;
+}
+
+.session-item .time {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+/* Known badge clickable hint */
+.status-card-clickable {
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow 0.15s;
+}
+
+.status-card-clickable:hover {
+  box-shadow: 0 0 0 2px var(--color-info);
+}
+
+.status-card-hint {
+  font-size: 0.78rem;
+  opacity: 0.65;
+  margin-block-start: 2px;
+}
+
+/* ── Visit History Modal (VaultEntry) ── */
+.ve-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: var(--space-lg);
+}
+
+.ve-modal-overlay.hidden {
+  display: none;
+}
+
+.ve-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ve-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ve-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ve-history-plate {
+  padding: var(--space-md) var(--space-lg);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+}
+
+.ve-history-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-lg) var(--space-md);
+}
+
+.ve-history-item {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+
+.ve-history-item:last-child {
+  border-bottom: none;
+}
+
+.ve-history-date {
+  font-weight: 600;
+  min-width: 90px;
+}
+
+.ve-history-time {
+  color: var(--color-text-secondary);
+  min-width: 52px;
+}
+
+.ve-history-note {
+  flex: 1;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ve-modal-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 /* ── Responsive ── */
 @media (min-width: 768px) {
   .ve-container {

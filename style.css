@@ -317,12 +317,16 @@ h4 { font-size: 1.125rem; }
 }
 
 /* Language toggle (pill with flags) */
+/* direction + flex-direction: row prevent RTL page from flipping the button order */
 .lang-toggle {
   display: inline-flex;
+  flex-direction: row !important; /* ES always left, HE always right */
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: none;
   gap: var(--space-xs);
+  direction: ltr !important;
+  unicode-bidi: isolate;
 }
 
 .lang-option {
@@ -356,6 +360,27 @@ h4 { font-size: 1.125rem; }
 
 .page-header .lang-option:hover:not(.active) {
   opacity: 0.8;
+}
+
+/* RTL: flip back arrow direction */
+[dir="rtl"] .header-back svg {
+  transform: scaleX(-1);
+}
+
+/* Login overlay back link */
+.login-back-link {
+  display: block;
+  margin-block-start: var(--space-md);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  text-align: center;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+.login-back-link:hover {
+  opacity: 1;
+  text-decoration: underline;
 }
 
 /* ══════════════════════════════════════════

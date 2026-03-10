@@ -3,8 +3,8 @@
 ## Architecture Overview
 ```
 ┌─────────────────┐
-│  GitHub Pages   │  ← Frontend (HTML/CSS/JS)
-│ (kopeladi.io)   │  Auto-deployed via GitHub Actions
+│     Vercel      │  ← Frontend (HTML/CSS/JS)
+│  (Vercel CDN)   │  Auto-deployed via Vercel Git integration
 └────────┬────────┘
          │ fetch()
          ▼
@@ -49,22 +49,21 @@ git commit -m "config: add Apps Script URL for production"
 git push origin main
 ```
 
-3. **GitHub Actions automatically deploys!** ✅
+3. **Vercel auto-deploys on push!** ✅
 
-### ✅ Part 3: Enable GitHub Pages (One-time)
-1. Go to https://github.com/kopeladi/ParkLog/settings
-2. Scroll to **Pages** section
-3. **Source:** Select `Deploy from a branch`
-4. **Branch:** Select `main` / `root`
-5. **Save**
+### ✅ Part 3: Connect to Vercel (One-time)
+1. Go to https://vercel.com/new
+2. Import the ParkLog Git repository
+3. Leave all build settings as default (static site, no build command)
+4. Click **Deploy**
 
-Alternatively, GitHub Actions will enable it automatically if you have the workflow file.
+Vercel will redeploy automatically on every push to `main`.
 
 ---
 
 ## 🔗 Live URLs After Deployment
 
-- **Frontend:** https://kopeladi.github.io/ParkLog
+- **Frontend:** https://parklog.vercel.app
 - **Apps Script:** (from client setup)
 
 ---

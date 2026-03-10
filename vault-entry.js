@@ -67,8 +67,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let lookupGeneration = 0; // incremented each lookup — stale results are discarded
   let submitCooldown = false;
 
-  /* ── Session Storage Key ── */
-  const SESSION_KEY = 'parklog-session-new-vehicles';
+  /* ── Session Storage Key (v2: all vehicles, localStorage, daily) ── */
+  const SESSION_STORE_KEY = 'parklog-session-v2';
+
+  /* ── History Modal ── */
+  const veHistoryModal = document.getElementById('ve-history-modal');
+  const veHistoryClose = document.getElementById('ve-history-close');
+  const veHistoryDone = document.getElementById('ve-history-done');
+  const veHistoryCopy = document.getElementById('ve-history-copy');
+  const veHistoryPlate = document.getElementById('ve-history-plate');
+  const veHistoryBody = document.getElementById('ve-history-body');
+
+  veHistoryClose.addEventListener('click', closeHistoryModal);
+  veHistoryDone.addEventListener('click', closeHistoryModal);
+  veHistoryModal.addEventListener('click', e => { if (e.target === veHistoryModal) closeHistoryModal(); });
+  veHistoryCopy.addEventListener('click', copyHistoryTable);
 
   /* ══════════════════════════════════════════
      Initialization
@@ -256,7 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
           placa,
           tipo: selectedTipo,
           notes: notesInput.value.trim(),
-          createdBy: currentUser || 'anonymous'
+          createdBy: currentUser || 'anonymous',
+          entryDate: _todayStr()  // client-side local date — eliminates Apps Script timezone dependency
         });
       }
 
@@ -265,10 +279,11 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(t('msg.queued'), 'warning');
       } else if (result.isNew) {
         showConfirmation(t('msg.saved.new'), 'success-new', placa);
-        addToSession(placa);
+        addToSession(placa, true);
       } else {
         const msg = t('msg.saved.known', { count: result.vehicle?.totalVisits || '?' });
         showConfirmation(msg, 'success-known', placa);
+        addToSession(placa, false);
       }
 
       /* Reset form */
@@ -295,49 +310,63 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ══════════════════════════════════════════
-     Session List (New Vehicles)
+     Session List (All Vehicles — daily, per user)
      ══════════════════════════════════════════ */
 
+  function _todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
   /**
-   * Adds a new vehicle to the session list.
-   * @param {string} placa - Plate number
+   * Adds a vehicle to the session list (new or known).
+   * @param {string} placa
+   * @param {boolean} isNew
    */
-  function addToSession(placa) {
+  function addToSession(placa, isNew) {
     const session = getSessionData();
-    session.push({
+    session.items.push({
       placa,
+      isNew,
       time: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
     });
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    saveSessionData(session);
     renderSessionList(session);
   }
 
   /**
-   * Gets current session data from sessionStorage.
-   * @returns {Array<{ placa: string, time: string }>}
+   * Gets session data from localStorage. Resets if date or user changed.
+   * @returns {{ date: string, user: string, items: Array }}
    */
   function getSessionData() {
     try {
-      return JSON.parse(sessionStorage.getItem(SESSION_KEY)) || [];
-    } catch {
-      return [];
-    }
+      const stored = JSON.parse(localStorage.getItem(SESSION_STORE_KEY));
+      const today = _todayStr();
+      if (stored && stored.date === today && stored.user === currentUser) {
+        return stored;
+      }
+    } catch { /* fall through */ }
+    return { date: _todayStr(), user: currentUser, items: [] };
+  }
+
+  function saveSessionData(session) {
+    localStorage.setItem(SESSION_STORE_KEY, JSON.stringify(session));
   }
 
   /** Loads and renders the session list on page load. */
   function loadSessionList() {
     const session = getSessionData();
-    if (session.length > 0) {
-      renderSessionList(session);
-    }
+    renderSessionList(session);
   }
 
   /**
    * Renders the session list DOM.
-   * @param {Array<{ placa: string, time: string }>} session
+   * @param {{ items: Array<{ placa: string, time: string, isNew: boolean }> }} session
    */
   function renderSessionList(session) {
-    if (session.length === 0) {
+    const items = session.items || [];
+
+    if (items.length === 0) {
       sessionItems.innerHTML = '';
       const empty = document.createElement('div');
       empty.className = 'empty-state';
@@ -353,9 +382,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     sessionItems.innerHTML = '';
-    session.forEach(item => {
+    items.forEach(item => {
       const el = document.createElement('div');
       el.className = 'session-item';
+
+      const badge = document.createElement('span');
+      badge.className = 'session-badge ' + (item.isNew ? 'session-badge-new' : 'session-badge-known');
+      badge.textContent = item.isNew ? t('session.badge.new') : t('session.badge.known');
 
       const plateSpan = document.createElement('span');
       plateSpan.className = 'plate';
@@ -365,24 +398,33 @@ document.addEventListener('DOMContentLoaded', () => {
       timeSpan.className = 'time';
       timeSpan.textContent = item.time;
 
+      el.appendChild(badge);
       el.appendChild(plateSpan);
       el.appendChild(timeSpan);
       sessionItems.appendChild(el);
     });
 
-    /* Update count badge */
-    sessionCount.textContent = session.length;
+    const newCount = items.filter(i => i.isNew).length;
+    sessionCount.textContent = items.length;
     sessionCount.classList.remove('hidden');
-    copySessionBtn.classList.remove('hidden');
+
+    /* Show copy button only if there are new vehicles */
+    if (newCount > 0) {
+      copySessionBtn.classList.remove('hidden');
+      const btnSpan = copySessionBtn.querySelector('span');
+      if (btnSpan) btnSpan.textContent = t('session.copy') + ` (${newCount})`;
+    } else {
+      copySessionBtn.classList.add('hidden');
+    }
 
     /* Scroll to bottom */
     sessionItems.scrollTop = sessionItems.scrollHeight;
   }
 
-  /** Copies all session plates to clipboard. */
+  /** Copies only NEW vehicles from today's session to clipboard. */
   async function copySessionPlates() {
     const session = getSessionData();
-    const plates = session.map(s => s.placa).join('\n');
+    const plates = (session.items || []).filter(s => s.isNew).map(s => s.placa).join('\n');
 
     try {
       await navigator.clipboard.writeText(plates);
@@ -445,6 +487,19 @@ document.addEventListener('DOMContentLoaded', () => {
         : vehicle.lastSeen;
       detail.textContent = `${t('badge.known.lastSeen')}: ${lastSeenDisplay} — ${vehicle.totalVisits} ${t('badge.known.totalVisits')}`;
       textDiv.appendChild(detail);
+
+      /* Hint: click to see history */
+      const hint = document.createElement('div');
+      hint.className = 'status-card-hint';
+      hint.textContent = t('badge.known.clickHistory');
+      textDiv.appendChild(hint);
+
+      /* Make card clickable */
+      card.classList.add('status-card-clickable');
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.addEventListener('click', () => openHistoryModal(vehicle.vehicleId, vehicle.placa || placaInput.value));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openHistoryModal(vehicle.vehicleId, vehicle.placa || placaInput.value); });
     } else if (isNew) {
       const detail = document.createElement('div');
       detail.className = 'status-detail';
@@ -539,6 +594,107 @@ document.addEventListener('DOMContentLoaded', () => {
     hideStatus();
     updateSubmitState();
     placaInput.focus();
+  }
+
+  /* ══════════════════════════════════════════
+     Visit History Modal
+     ══════════════════════════════════════════ */
+
+  let _historyAutoCloseTimer = null;
+  let _historyData = []; // for copy-to-clipboard
+
+  async function openHistoryModal(vehicleId, placa) {
+    /* Clear any previous auto-close timer */
+    clearTimeout(_historyAutoCloseTimer);
+    _historyData = [];
+    veHistoryCopy.classList.add('hidden');
+
+    veHistoryPlate.textContent = placa || '';
+    veHistoryBody.innerHTML = `<p class="text-sm text-muted" style="padding:var(--space-md) 0">${t('loading')}</p>`;
+    veHistoryModal.classList.remove('hidden');
+
+    try {
+      const result = await DataStore.getVehicleHistory(vehicleId);
+      const history = result.history || [];
+
+      if (history.length === 0) {
+        veHistoryBody.innerHTML = `<p class="text-sm text-muted" style="padding:var(--space-md) 0">${t('empty.noEntries')}</p>`;
+      } else {
+        _historyData = history;
+        veHistoryBody.innerHTML = '';
+        history.forEach(entry => {
+          const item = document.createElement('div');
+          item.className = 've-history-item';
+
+          const dateEl = document.createElement('span');
+          dateEl.className = 've-history-date';
+          const dateOnly = entry.date ? String(entry.date).substring(0, 10) : '';
+          const dateParts = dateOnly.match(/^\d{4}-\d{2}-\d{2}$/)
+            ? dateOnly.split('-').reverse().join('/')
+            : (entry.date || '');
+          dateEl.textContent = dateParts;
+
+          const timeEl = document.createElement('span');
+          timeEl.className = 've-history-time';
+          timeEl.textContent = entry.time || '';
+
+          const noteEl = document.createElement('span');
+          noteEl.className = 've-history-note';
+          noteEl.textContent = entry.notes || '';
+
+          item.appendChild(dateEl);
+          item.appendChild(timeEl);
+          item.appendChild(noteEl);
+          veHistoryBody.appendChild(item);
+        });
+        veHistoryCopy.classList.remove('hidden');
+      }
+
+      /* Auto-close 10 seconds AFTER data is shown (not from when loading started) */
+      _historyAutoCloseTimer = setTimeout(closeHistoryModal, 10000);
+
+    } catch (err) {
+      veHistoryBody.innerHTML = `<p class="text-sm text-muted" style="padding:var(--space-md) 0">${t('msg.error.server')}</p>`;
+    }
+  }
+
+  function closeHistoryModal() {
+    clearTimeout(_historyAutoCloseTimer);
+    veHistoryModal.classList.add('hidden');
+  }
+
+  async function copyHistoryTable() {
+    if (_historyData.length === 0) return;
+    const plate = veHistoryPlate.textContent || '';
+    const header = `${plate}\n${'תאריך'.padEnd(12)}${'שעה'.padEnd(8)}הערה`;
+    const rows = _historyData.map(e => {
+      const dateOnly = e.date ? String(e.date).substring(0, 10) : '';
+      const dateStr = dateOnly.match(/^\d{4}-\d{2}-\d{2}$/)
+        ? dateOnly.split('-').reverse().join('/')
+        : (e.date || '');
+      return `${dateStr.padEnd(12)}${(e.time || '').padEnd(8)}${e.notes || ''}`;
+    });
+    const text = [header, ...rows].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      const orig = veHistoryCopy.textContent;
+      veHistoryCopy.textContent = '✓ הועתק';
+      setTimeout(() => { veHistoryCopy.textContent = orig; }, 2000);
+    } catch {
+      /* fallback for older browsers */
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      const orig = veHistoryCopy.textContent;
+      veHistoryCopy.textContent = '✓ הועתק';
+      setTimeout(() => { veHistoryCopy.textContent = orig; }, 2000);
+    }
   }
 
   /* ══════════════════════════════════════════

@@ -39,8 +39,7 @@ const SHEET_ID = 'YOUR-SHEET-ID-HERE'; // ← החלף עם ה-Sheet ID שלך (
 const ALLOWED_ORIGINS = [
   'http://localhost:8080',
   'http://127.0.0.1:8080',
-  'https://kopeladi.github.io',
-  'https://kopeladi.github.io/ParkLog'
+  'https://parklog.vercel.app'
 ];
 
 /** @const {number} Max notes length */

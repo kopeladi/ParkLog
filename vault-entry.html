@@ -26,6 +26,7 @@
       <button id="login-btn" class="btn btn-primary btn-block">
         <span data-i18n="login.submit">Entrar</span>
       </button>
+      <a href="index.html" class="login-back-link" data-i18n="login.back">← Volver al inicio</a>
     </div>
   </div>
 
@@ -131,7 +132,7 @@
         <div class="session-list-header">
           <h3>
             <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--color-success)"></i>
-            <span data-i18n="session.title">Vehículos nuevos esta sesión</span>
+            <span data-i18n="session.title">Vehículos en esta sesión</span>
             <span id="session-count" class="session-count hidden">0</span>
           </h3>
           <button id="copy-session-btn" class="btn btn-sm btn-secondary hidden">
@@ -148,6 +149,22 @@
 
     </div>
   </main>
+
+  <!-- Visit History Modal -->
+  <div id="ve-history-modal" class="ve-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ve-history-title">
+    <div class="ve-modal">
+      <div class="ve-modal-header">
+        <h3 id="ve-history-title" data-i18n="history.title">Historial de visitas</h3>
+        <button id="ve-history-close" class="btn btn-ghost" aria-label="Close">✕</button>
+      </div>
+      <div id="ve-history-plate" class="ve-history-plate"></div>
+      <div id="ve-history-body" class="ve-history-body"></div>
+      <div class="ve-modal-footer">
+        <button id="ve-history-copy" class="btn btn-ghost btn-sm" data-i18n="history.copy">העתק טבלה</button>
+        <button id="ve-history-done" class="btn btn-primary btn-sm" data-i18n="history.close">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <script src="config.js"></script>
   <script src="i18n.js"></script>
